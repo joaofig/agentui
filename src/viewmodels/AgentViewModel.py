@@ -45,7 +45,14 @@ class AgentViewModel(ViewModel):
                 messages=new_messages,
                 stream=True
             )
-            assistant_message = ""
+
+            assistant_message = \
+                '<div style="border:1px solid #ccc; padding:4px; border-radius:6px; font-weight: bold;' + \
+                'background-color: antiquewhite">' + \
+                self.prompt + \
+                "</div><br/>"
+            self.response += assistant_message
+
             async for chunk in stream:
                 if chunk.choices and chunk.choices[0].delta.content:
                     content = str(chunk.choices[0].delta.content)

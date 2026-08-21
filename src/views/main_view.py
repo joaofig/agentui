@@ -12,7 +12,7 @@ class MainView(View):
             with ui.splitter(horizontal=True).classes("w-full h-full") as splitter:
                 with splitter.before:
                     with ui.row().classes("w-full h-full"):
-                        ui.markdown("").classes("h-full m-4") \
+                        ui.markdown("", extras=["markdown-in-html"]).classes("h-full m-4") \
                             .bind_content_from(vm, "response")
                 with splitter.after:
                     with ui.row().classes("w-full h-full"):
