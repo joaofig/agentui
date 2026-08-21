@@ -51,6 +51,7 @@ class AgentViewModel(ViewModel):
                     content = str(chunk.choices[0].delta.content)
                     assistant_message += content
                     self.response += content
+            assistant_message += " \r\n \r\n ---  \r\n \r\n"
             self.messages.append({'role': 'assistant', 'content': assistant_message})
             await stream.response.aclose()
         self.busy = False
