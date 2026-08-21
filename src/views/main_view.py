@@ -24,7 +24,7 @@ class MainView(View):
                                 .bind_value(vm, "prompt")
 
                         with ui.column().classes("flex-none h-full"):
-                            ui.button("Send", on_click=self._send_prompt) \
+                            ui.button("Submit", on_click=self._send_prompt) \
                                 .classes("m-4")
                             ui.spinner(size="lg").bind_visibility_from(vm, "busy")
 
