@@ -1,7 +1,7 @@
 from nicegui import ui
 
-from viewmodels.view_model import ViewModel
-from views.view import View
+from src.viewmodels.view_model import ViewModel
+from src.views.view import View
 
 
 class MainView(View):

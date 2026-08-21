@@ -9,10 +9,10 @@ ENV PORT=8080
 COPY pyproject.toml .
 RUN uv sync --no-dev
 
-WORKDIR /src
+WORKDIR /
 
 COPY . .
 
 EXPOSE 8080
 
-CMD ["uv", "run", "python", "src/main.py"]
+CMD ["uv", "run", "python", "main.py"]

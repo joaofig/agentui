@@ -4,8 +4,7 @@ from typing import Any
 from nicegui import binding
 from openai import AsyncOpenAI
 
-from tools.tasks import ManagedTasks
-from viewmodels.view_model import ViewModel
+from src.viewmodels.view_model import ViewModel
 
 
 @binding.bindable_dataclass

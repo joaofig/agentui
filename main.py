@@ -3,8 +3,8 @@ import os
 from dotenv import load_dotenv
 from nicegui import ui, context, app
 
-from viewmodels.AgentViewModel import AgentViewModel
-from views.main_view import MainView
+from src.viewmodels.AgentViewModel import AgentViewModel
+from src.views.main_view import MainView
 
 
 @ui.page("/")
@@ -31,7 +31,7 @@ def index():
 
 
 
-app.add_static_file(local_file=os.path.join(os.path.dirname(__file__), 'images', 'support_agent_24dp_1F1F1F.png'),
+app.add_static_file(local_file=os.path.join(os.path.dirname(__file__), 'src/images', 'support_agent_24dp_1F1F1F.png'),
                     url_path='/favicon.ico')
 load_dotenv()
 ui.run(
