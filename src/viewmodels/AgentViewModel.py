@@ -29,10 +29,7 @@ class AgentViewModel(ViewModel):
 
         self.messages.append({'role': 'user', 'content': self.prompt})
 
-        async with AsyncOpenAI(
-                base_url="https://hostyourai.com/api/v1",
-                api_key="hyai-rt-SKwOxyha8cJ5ecq2uVJUPM0HQN8Ib17plEUeNLGJ"
-        ) as client:
+        async with AsyncOpenAI(base_url=self.api_url, api_key=self.api_key) as client:
             new_messages = [
                 {
                     "role": "system",
