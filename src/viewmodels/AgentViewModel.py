@@ -1,6 +1,9 @@
+import os
+
 from dataclasses import field
 from typing import Any
 
+from dotenv import load_dotenv
 from nicegui import binding
 from openai import AsyncOpenAI
 
@@ -16,6 +19,10 @@ class AgentViewModel(ViewModel):
 
     def __post_init__(self):
         super().__init__()
+
+        load_dotenv()
+        self.api_key = os.getenv("OPENAI_API_KEY", "your_default_api_key_here")
+        self.api_url = os.getenv("OPENAI_API_URL", "https://hostyourai.com/api/v1")
 
     async def _send_prompt(self) -> None:
         self.busy = True

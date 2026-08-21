@@ -30,7 +30,6 @@ def index():
     MainView(AgentViewModel())
 
 
-
 app.add_static_file(local_file=os.path.join(os.path.dirname(__file__), 'src/images', 'support_agent_24dp_1F1F1F.png'),
                     url_path='/favicon.ico')
 load_dotenv()
