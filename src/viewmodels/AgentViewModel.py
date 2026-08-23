@@ -15,6 +15,7 @@ class AgentViewModel(ViewModel):
     prompt: str = ""
     response: str = "### Answer Panel \r\n \r\n"
     busy: bool = False
+    enabled: bool = True
     messages: list[dict[str, str]] = field(default_factory=list)
 
     def __post_init__(self):
@@ -26,8 +27,18 @@ class AgentViewModel(ViewModel):
 
     async def _send_prompt(self) -> None:
         self.busy = True
+        self.enabled = False
 
-        self.messages.append({'role': 'user', 'content': self.prompt})
+        prompt = self.prompt
+        self.prompt = ""
+        self.messages.append({'role': 'user', 'content': prompt})
+
+        assistant_message = \
+            '<div style="border:1px solid #ccc; padding:4px; border-radius:6px; font-weight: bold;' + \
+            'background-color: antiquewhite">' + \
+            prompt + \
+            "</div><br/>"
+        self.response += assistant_message
 
         async with AsyncOpenAI(base_url=self.api_url, api_key=self.api_key) as client:
             new_messages = [
@@ -41,17 +52,10 @@ class AgentViewModel(ViewModel):
                 *self.messages
             ]
             stream = await client.chat.completions.create(
-                model="qwen3-235b-a22b-instruct-2507",
+                model="Qwen/Qwen3.5-397B-A17B",
                 messages=new_messages,
                 stream=True
             )
-
-            assistant_message = \
-                '<div style="border:1px solid #ccc; padding:4px; border-radius:6px; font-weight: bold;' + \
-                'background-color: antiquewhite">' + \
-                self.prompt + \
-                "</div><br/>"
-            self.response += assistant_message
 
             async for chunk in stream:
                 if chunk.choices and chunk.choices[0].delta.content:
@@ -61,6 +65,8 @@ class AgentViewModel(ViewModel):
             assistant_message += " \r\n \r\n ---  \r\n \r\n"
             self.messages.append({'role': 'assistant', 'content': assistant_message})
             await stream.response.aclose()
+
+        self.enabled = True
         self.busy = False
 
     # async def _add_content(self, content: str) -> None:

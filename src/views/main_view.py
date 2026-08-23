@@ -17,11 +17,13 @@ class MainView(View):
                 with splitter.after:
                     with ui.row().classes("w-full h-full"):
                         with ui.column().classes("flex-1 h-full"):
-                            # .on("keydown.enter", self._send_prompt) \
+                            #
                             ui.textarea("") \
+                                .on("keydown.enter", self._send_prompt) \
                                 .classes("w-full h-full pl-4 pr-4") \
                                 .props("clearable autofocus hide-bottom-space dense borderless") \
-                                .bind_value(vm, "prompt")
+                                .bind_value(vm, "prompt") \
+                                .bind_enabled_from(vm, "enabled")
 
                         with ui.column().classes("flex-none h-full"):
                             ui.button("Submit", on_click=self._send_prompt) \
