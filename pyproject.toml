@@ -6,7 +6,7 @@ readme = "README.md"
 authors = [
     { name = "João Paulo Figueira", email = "joao.figueira@gmail.com" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
     "httpcore2[asyncio]>=2.12.0",
     "nicegui>=3.16.0",
