@@ -35,15 +35,24 @@ class PostgresRepository:
                 await self.conn.commit()
         return []
 
-    async def insert_or_update(self, insert: LiteralString, update: LiteralString, value: dict) -> dict:
+    async def insert_or_update(
+            self,
+            insert: LiteralString,
+            update: LiteralString,
+            value: dict,
+            key_field: str = ""
+    ) -> dict:
         await self.connect()
         if self.conn:
-            row_id_fields = [k for k in value if k == "id" or k.endswith("_id")]
-            if not row_id_fields:
-                # Fallback if no obvious ID field
-                row_id = "id"
+            if key_field:
+                row_id = key_field
             else:
-                row_id = row_id_fields[0]
+                row_id_fields = [k for k in value if k == "id" or k.endswith("_id")]
+                if not row_id_fields:
+                    # Fallback if no obvious ID field
+                    row_id = "id"
+                else:
+                    row_id = row_id_fields[0]
 
             async with self.conn.cursor() as cur:
                 if value.get(row_id, 0) > 0:

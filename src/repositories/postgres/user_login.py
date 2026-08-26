@@ -5,7 +5,7 @@ from src.dtos.user_login import UserLoginDTO
 from src.repositories.postgres.base import PostgresRepository
 
 
-class UserRepository(PostgresRepository):
+class UserLoginRepository(PostgresRepository):
     def __init__(self):
         super().__init__()
 

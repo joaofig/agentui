@@ -7,6 +7,11 @@ from src.viewmodels.AgentViewModel import AgentViewModel
 from src.views.main_view import MainView
 
 
+def logout():
+    app.storage.user.clear()
+    ui.navigate.to("/login")
+
+
 @ui.page("/")
 def index():
     ui.add_css("""

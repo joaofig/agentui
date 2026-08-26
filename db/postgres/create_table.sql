@@ -47,7 +47,7 @@ CREATE TABLE IF NOT EXISTS public.user_activity
     user_activity_id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     user_id bigint NOT NULL,
     user_name character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    user_action character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    user_action character varying(256) COLLATE pg_catalog."default" NOT NULL,
     created_at timestamp without time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT user_activity_pkey PRIMARY KEY (user_activity_id),
