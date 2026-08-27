@@ -1,9 +1,9 @@
 from nicegui import ui, app
 
 from src.views.agent_panel import AgentPanel
-from tools.user import logout
-from viewmodels.agent import AgentViewModel
-from views.admin.admin_panel import AdminPanel
+from src.tools.user import logout
+from src.viewmodels.agent import AgentViewModel
+from src.views.admin.admin_panel import AdminPanel
 
 
 class MainView:

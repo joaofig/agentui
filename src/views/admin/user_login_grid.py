@@ -4,7 +4,7 @@ from nicegui.observables import ObservableList
 
 from src.viewmodels.view_model import ViewModel
 from src.views.view import View
-from viewmodels.user_login import UserLoginViewModel
+from src.viewmodels.user_login import UserLoginViewModel
 
 
 class UserLoginGrid(View):

@@ -4,7 +4,7 @@ from src.tools.tasks import ManagedTasks
 from src.viewmodels.sql import SQLViewModel
 from src.viewmodels.user_login_list import UserLoginListViewModel
 from src.views.admin.sql_view import SQLView
-from views.admin.user_login_view import UserLoginView
+from src.views.admin.user_login_view import UserLoginView
 
 
 class AdminPanel:
