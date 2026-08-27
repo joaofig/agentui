@@ -50,7 +50,8 @@ class AgentViewModel(ViewModel):
             *self.messages
         ]
         response = await acompletion(
-            model="openai/Qwen/Qwen3.5-397B-A17B",
+            # model="openai/Qwen/Qwen3.5-397B-A17B",
+            model="openai/moonshotai/Kimi-K3",
             messages=new_messages,
             base_url=self.api_url,
             api_key=self.api_key
