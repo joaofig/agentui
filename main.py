@@ -97,7 +97,7 @@ async def login(redirect_to: str = "/") -> RedirectResponse | None:
         else:
             ui.notify("Wrong username or password", color="negative")
 
-    ui.label("Study Coordinator").classes("text-h2 text-center w-full")
+    ui.label("Custor Agent").classes("text-h2 text-center w-full")
 
     with ui.card().classes("absolute-center items-stretch"):
         username = (
@@ -156,7 +156,7 @@ def index():
     """)
 
     context.client.content.classes("p-0")
-    ui.page_title("Agent")
+    ui.page_title("Custor Agent")
     add_inactivity_timeout(300, logout)  # 5 minutes of inactivity
     MainView()
 
