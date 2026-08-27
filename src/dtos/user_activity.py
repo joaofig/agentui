@@ -1,4 +1,4 @@
-from dtos.base import ReadOnlyDTO
+from src.dtos.base import ReadOnlyDTO
 
 
 class UserActivityDTO(ReadOnlyDTO):

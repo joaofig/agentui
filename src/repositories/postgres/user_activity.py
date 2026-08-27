@@ -1,7 +1,7 @@
 from typing import LiteralString
 
-from dtos.user_activity import UserActivityDTO
-from repositories.postgres.base import PostgresRepository
+from src.dtos.user_activity import UserActivityDTO
+from src.repositories.postgres.base import PostgresRepository
 
 
 class UserActivityRepository(PostgresRepository):

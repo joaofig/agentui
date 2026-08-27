@@ -54,7 +54,6 @@ VALUES
      now(),
      'root'
     );
-                                                                                                                                 ()
 
 -- Table: public.user_activity
 
