@@ -1,34 +1,37 @@
-from nicegui import ui
+from nicegui import ui, app
 
-from src.viewmodels.view_model import ViewModel
-from src.views.view import View
+from src.views.agent_panel import AgentPanel
+from tools.user import logout
+from viewmodels.agent import AgentViewModel
+from views.admin.admin_panel import AdminPanel
 
 
-class MainView(View):
-    def __init__(self, vm: ViewModel):
-        super().__init__(vm)
+class MainView:
+    def __init__(self):
+        user_role = app.storage.user.get("user_role", "User")
 
         with ui.column().classes("w-full h-screen"):
-            with ui.splitter(horizontal=True).classes("w-full h-full") as splitter:
-                with splitter.before:
-                    with ui.row().classes("w-full h-full"):
-                        ui.markdown("", extras=["markdown-in-html"]).classes("h-full m-4") \
-                            .bind_content_from(vm, "response")
-                with splitter.after:
-                    with ui.row().classes("w-full h-full"):
-                        with ui.column().classes("flex-1 h-full"):
-                            #
-                            ui.textarea("") \
-                                .on("keydown.enter", self._send_prompt) \
-                                .classes("w-full h-full pl-4 pr-4") \
-                                .props("clearable autofocus hide-bottom-space dense borderless") \
-                                .bind_value(vm, "prompt") \
-                                .bind_enabled_from(vm, "enabled")
+            with ui.row().classes("w-full flex-1"):
+                with ui.tabs().props("dense no-caps") as tabs:
+                    agent = ui.tab("Agent").classes("text-sky-800")
+                    admin = ui.tab("Admin").classes("text-sky-800")
 
-                        with ui.column().classes("flex-none h-full"):
-                            ui.button("Submit", on_click=self._send_prompt) \
-                                .classes("m-4")
-                            ui.spinner(size="lg").bind_visibility_from(vm, "busy")
+                    # Only visible to Admin users
+                    admin.set_visibility(user_role == "Admin")
 
-    async def _send_prompt(self):
-        await self.vm.call("send_prompt")
+                with ui.row().classes("w-full flex-1 justify-end"):
+                    with ui.button(text="Logout", on_click=logout)\
+                            .classes("text-xs mr-4 mt-2") \
+                            .props("padding=xs"):
+                        ui.tooltip("Log Out")
+
+                with ui.tab_panels(tabs, value=agent, animated=False) \
+                        .classes("h-full w-full"):
+
+                    with ui.tab_panel(agent).classes("pl-4 pt-0 pb-0 pr-4"):
+                        agent_vm = AgentViewModel()
+                        AgentPanel(agent_vm)
+
+                    with ui.tab_panel(admin).classes("pl-4 pt-0 pb-0 pr-4"):
+                        if user_role == "Admin":
+                            AdminPanel()

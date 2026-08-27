@@ -1,10 +1,137 @@
 import os
+from datetime import datetime
 
 from dotenv import load_dotenv
-from nicegui import ui, context, app
+from nicegui import app, context, ui
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
 
-from src.viewmodels.AgentViewModel import AgentViewModel
+from dtos.user_login import UserLoginDTO, hash_password
+from models.user_login import UserLoginModel
+from src.viewmodels.agent import AgentViewModel
 from src.views.main_view import MainView
+from tools.user import record_user_activity
+from viewmodels.user_login import UserLoginViewModel
+from views.admin.dialogs.password_dialog import PasswordDialog
+
+# top-level static routes like /favicon.ico must be unrestricted, otherwise the middleware redirects them to /login
+unrestricted_page_routes = {"/favicon.ico", "/login"}
+
+
+@app.add_middleware
+class AuthMiddleware(BaseHTTPMiddleware):
+    """This middleware restricts access to all NiceGUI pages.
+
+    It redirects the user to the login page if they are not authenticated.
+    """
+
+    async def dispatch(self, request: Request, call_next):
+        last_activity_time = app.storage.user.get("last_activity_time", datetime.now().isoformat())
+        last_activity_seconds = (datetime.now() - datetime.fromisoformat(last_activity_time)).total_seconds()
+        path = request.url.path
+        if (
+            app.storage.user.get("authenticated", False)
+            and last_activity_seconds <= 5 * 60              # 5 minutes of inactivity sends you to the login page
+            or path in unrestricted_page_routes
+            or path.startswith("/_nicegui")
+        ):
+            record_user_activity()
+            return await call_next(request)
+        return RedirectResponse(f"/login?redirect_to={path}")
+
+
+async def change_password(user: UserLoginDTO) -> bool:
+    vm = UserLoginViewModel()
+    vm.copy(user)
+    dialog = PasswordDialog(vm)
+    result = await dialog.show()
+    if result == "save":
+        if vm.password_1 != vm.password_2:
+            ui.notify("Passwords do not match", color="negative")
+            return False
+        user.pass_hash = hash_password(vm.password_1)
+        user.change_pass = False
+        vm.copy(user)
+        await vm.save()
+        return True
+    return False
+
+
+@ui.page("/login")
+async def login(redirect_to: str = "/") -> RedirectResponse | None:
+    if app.storage.user.get("authenticated", False):
+        return RedirectResponse("/")
+
+    last_login_time = app.storage.user.get("login_time", None)
+    if last_login_time is not None:
+        time_since_last_login = datetime.now() - last_login_time
+        if time_since_last_login.total_seconds() > 5 * 60:  # 5 minutes
+            ui.notify("You have been logged out due to inactivity.", color="negative")
+            return RedirectResponse("/")
+
+    async def try_login() -> None:
+        model = UserLoginModel()
+        pass_hash = hash_password(password.value or "")
+        user: UserLoginDTO | None = await model.get_user(username.value or "user", pass_hash)
+
+        if user is not None:
+            app.storage.user.update(
+                username=username.value,
+                user_role=user.user_role,
+                user_id=user.user_id,
+                authenticated=True,
+                login_time=datetime.now(),
+            )
+
+            username.value = ""
+            password.value = ""
+            if user.change_pass:
+                if await change_password(user):
+                    ui.notify("Password changed successfully", color="positive")
+                    ui.navigate.to(redirect_to)  # go back to where the user wanted to go
+                else:
+                    ui.notify("Password change failed", color="negative")
+                    ui.navigate.to("/login")
+            else:
+                ui.navigate.to(redirect_to)  # go back to where the user wanted to go
+        else:
+            ui.notify("Wrong username or password", color="negative")
+
+    ui.label("Study Coordinator").classes("text-h2 text-center w-full")
+
+    with ui.card().classes("absolute-center items-stretch"):
+        username = (
+            ui.input("User name")
+            .props("autofocus")
+            .on("keydown.enter", lambda: password.run_method("focus"))
+        )
+        password = ui.input("Password", password=True, password_toggle_button=True).on(
+            "keydown.enter", try_login
+        )
+        ui.button("Log In", on_click=try_login)
+
+    return None
+
+
+def add_inactivity_timeout(timeout_seconds: float, on_timeout):
+    """Redirects/logs out after `timeout_seconds` of no user activity."""
+    ui.add_body_html(f"""
+    <script>
+    (function() {{
+        let timer;
+        function reset() {{
+            clearTimeout(timer);
+            timer = setTimeout(() => emitEvent('inactivity_timeout'), {timeout_seconds * 1000});
+        }}
+        ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt =>
+            document.addEventListener(evt, reset, true));
+        reset();
+    }})();
+    </script>
+    """)
+    ui.on("inactivity_timeout", on_timeout)
+    app.storage.user.update(last_activity_time=datetime.now().isoformat())
 
 
 def logout():
@@ -31,8 +158,8 @@ def index():
 
     context.client.content.classes("p-0")
     ui.page_title("Agent")
-    # add_inactivity_timeout(300, logout)  # 5 minutes of inactivity
-    MainView(AgentViewModel())
+    add_inactivity_timeout(300, logout)  # 5 minutes of inactivity
+    MainView()
 
 
 app.add_static_file(local_file=os.path.join(os.path.dirname(__file__), 'src/images', 'support_agent_24dp_1F1F1F.png'),
@@ -42,7 +169,7 @@ ui.run(
     host="0.0.0.0",
     port=int(os.environ.get("PORT", 8080)),
     favicon="/favicon.ico",
-    title="Agent",
+    title="Custor Agent",
     reload=True,
     storage_secret=os.environ.get("STORAGE_SECRET", "default_secret"),
 )

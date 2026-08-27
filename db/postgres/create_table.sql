@@ -38,6 +38,24 @@ CREATE UNIQUE INDEX IF NOT EXISTS index_user_login_pass
     (user_name COLLATE pg_catalog."default" ASC NULLS LAST, pass_hash COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
 
+
+INSERT INTO public.user_login
+    (
+     user_name, pass_hash, user_role, change_pass, created_at, created_by, updated_at, updated_by
+    )
+VALUES
+    (
+     'admin',
+     'b4074c85261b5b773355468f302cf31d9e4c259d250cad9328f26701ffa47981',
+     'Admin',
+     false,
+     now(),
+     'root',
+     now(),
+     'root'
+    );
+                                                                                                                                 ()
+
 -- Table: public.user_activity
 
 DROP TABLE IF EXISTS public.user_activity CASCADE;

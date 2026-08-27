@@ -1,0 +1,56 @@
+from nicegui import ui
+
+from src.dtos.user_login import USER_ROLES
+from src.viewmodels.user_login import UserLoginViewModel
+from src.views.view import View
+
+
+class PasswordDialog(View):
+    def __init__(self, vm: UserLoginViewModel):
+        super().__init__(vm)
+        user_vm = vm
+
+        # Ensure user_role has a default value if not set
+        if not user_vm.user_role:
+            user_vm.user_role = "User"
+
+        with ui.dialog() as dialog, ui.card().classes("w-120"):
+            with ui.row().classes("w-full bg-gray-200 p-2"):
+                ui.label("Change Password").classes("text-base")
+
+            ui.input(label="User Name") \
+                .classes("w-full") \
+                .props("disabled dense") \
+                .bind_value(user_vm, "user_name")
+
+            ui.select(label="Role", options=USER_ROLES) \
+                .classes("w-full") \
+                .props("disable dense") \
+                .bind_value(user_vm, "user_role") \
+                .set_enabled(False)  # Disable role selection in password dialog
+
+            ui.input(label="Password", password=True, password_toggle_button=True) \
+                .classes("w-full") \
+                .props("dense") \
+                .bind_value(user_vm, "password_1")
+
+            ui.input(label="Confirm Password", password=True, password_toggle_button=True) \
+                .classes("w-full") \
+                .props("dense") \
+                .bind_value(user_vm, "password_2")
+
+            with ui.row():
+                ui.button("Save", on_click=self.save).props("dense")
+                ui.button("Cancel", on_click=lambda: dialog.submit("cancel")).props("dense")
+            self.dialog = dialog
+
+    async def save(self):
+        if self.vm.get("password_1") != self.vm.get("password_2"):
+            ui.notify("Passwords do not match", kind="error")
+            return
+
+        await self.vm.call("save")
+        self.dialog.submit("save")
+
+    async def show(self):
+        return await self.dialog

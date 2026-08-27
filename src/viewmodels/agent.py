@@ -1,11 +1,10 @@
 import os
-
 from dataclasses import field
 from typing import Any
 
 from dotenv import load_dotenv
+from litellm import acompletion
 from nicegui import binding
-from openai import AsyncOpenAI
 
 from src.viewmodels.view_model import ViewModel
 
@@ -40,31 +39,29 @@ class AgentViewModel(ViewModel):
             "</div><br/>"
         self.response += assistant_message
 
-        async with AsyncOpenAI(base_url=self.api_url, api_key=self.api_key) as client:
-            new_messages = [
-                {
-                    "role": "system",
-                    "content": """
-                        You are a helpful assistant that provides accurate and concise answers to user questions.
-                        You are precise and concise. Stay on topic.
-                    """
-                },
-                *self.messages
-            ]
-            stream = await client.chat.completions.create(
-                model="Qwen/Qwen3.5-397B-A17B",
-                messages=new_messages,
-                stream=True
-            )
+        new_messages = [
+            {
+                "role": "system",
+                "content": """
+                    You are a helpful assistant that provides accurate and concise answers to user questions.
+                    You are precise and concise. Stay on topic.
+                """
+            },
+            *self.messages
+        ]
+        response = await acompletion(
+            model="openai/Qwen/Qwen3.5-397B-A17B",
+            messages=new_messages,
+            base_url=self.api_url,
+            api_key=self.api_key
+        )
+        content = response.choices[0].message.content
+        if content:
+            assistant_message += content
+            self.response += content
 
-            async for chunk in stream:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    content = str(chunk.choices[0].delta.content)
-                    assistant_message += content
-                    self.response += content
             assistant_message += " \r\n \r\n ---  \r\n \r\n"
             self.messages.append({'role': 'assistant', 'content': assistant_message})
-            await stream.response.aclose()
 
         self.enabled = True
         self.busy = False

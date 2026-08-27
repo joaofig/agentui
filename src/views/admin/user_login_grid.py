@@ -1,0 +1,103 @@
+from nicegui import app, ui
+from nicegui.elements.aggrid import AgGrid
+from nicegui.observables import ObservableList
+
+from src.viewmodels.view_model import ViewModel
+from src.views.view import View
+from viewmodels.user_login import UserLoginViewModel
+
+
+class UserLoginGrid(View):
+    def __init__(self, vm: ViewModel):
+        super().__init__(vm)
+
+        self.users = self.vm.get("users")
+        if isinstance(self.users, ObservableList):
+            self.users.on_change(self._update_grid)
+
+        self.grid = self._build_grid()
+
+    def _build_grid(self) -> AgGrid:
+        columns = [
+            {
+                "headerName": "Edit",
+                "field": "user_id",
+                "width": 50,
+                ":cellRenderer": """
+                (params) => {
+                    const btn = document.createElement('button');
+                    btn.innerText = '✏️';
+                    btn.style.cssText = 'cursor:pointer; padding:2px 8px;';
+                    btn.addEventListener('click', () => {
+                        emitEvent('user-row-edit', params.data);
+                    });
+                return btn;
+                }
+                """,
+            },
+            {
+                "headerName": "User Name", "field": "user_name", "sortable": True, "align": "left",
+                "filter": "agTextColumnFilter", "floatingFilter": False,
+            },
+            {
+                "headerName": "Role", "field": "user_role", "sortable": True, "align": "left",
+                "filter": "agTextColumnFilter", "floatingFilter": False,
+            },
+            {
+                "headerName": "Created At", "field": "created_at", "sortable": True, "align": "left",
+                "filter": "agTextColumnFilter", "floatingFilter": False,
+            },
+            {
+                "headerName": "Created By", "field": "created_by", "sortable": True, "align": "left",
+                "filter": "agTextColumnFilter", "floatingFilter": False,
+            },
+            {
+                "headerName": "Updated At", "field": "updated_at", "sortable": True, "align": "left",
+                "filter": "agTextColumnFilter", "floatingFilter": False,
+            },
+            {
+                "headerName": "Updated By", "field": "updated_by", "sortable": True, "align": "left",
+                "filter": "agTextColumnFilter", "floatingFilter": False,
+            },
+        ]
+        grid_def = {
+            "columnDefs": columns,
+            "rowData": self.users,
+            "rowSelection": {
+                "mode": "singleRow",
+                "checkboxes": False,
+                "enableClickSelection": True,
+            },
+            ":getRowId": "(params) => String(params.data.user_id)",
+        }
+        ui.on("user-row-edit", self._on_edit)
+
+        grid = ui.aggrid(grid_def, theme="balham").classes("w-full h-full")
+        grid.on("selectionChanged", lambda event: self._row_selection_changed(event))
+        return grid
+
+    async def _update_grid(self):
+        await self.grid.run_grid_method("setGridOption", "rowData", self.users)
+
+        # Restore the selected user
+        user_id = self.vm.get("selected_id")
+        if user_id != 0:
+            await self.grid.run_row_method(user_id, "setSelected", True)
+
+    async def _on_edit(self, event):
+        row_data = event.args  # dict with the full row's data
+        if row_data:
+            from src.views.admin.dialogs.user_login_dialog import UserLoginDialog
+
+            vm = UserLoginViewModel()
+            vm.updated_by = app.storage.user.get("username", "Unknown")
+            dialog = UserLoginDialog(vm)
+            await dialog.vm.call("load", user_id=row_data["user_id"])
+            result = await dialog.show()
+            if result == "save":
+                await self.vm.call("load")
+
+    async def _row_selection_changed(self, event):
+        row = await self.grid.get_selected_row()
+        if row:
+            await self.vm.call("user_selected", user=row, user_id=row["user_id"])

@@ -5,7 +5,7 @@ from src.dtos.user_login import UserLoginDTO
 from src.repositories.postgres.user_login import UserLoginRepository
 
 
-class UserModel:
+class UserLoginModel:
     repo = UserLoginRepository()
 
     @classmethod
