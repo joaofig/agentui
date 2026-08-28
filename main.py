@@ -1,4 +1,5 @@
 import os
+import uuid
 from datetime import datetime
 
 from dotenv import load_dotenv
@@ -161,6 +162,7 @@ def index():
     MainView()
 
 
+app.add_static_files(local_directory="src/static", url_path="/static")
 app.add_static_file(local_file=os.path.join(os.path.dirname(__file__), 'src/images', 'support_agent_24dp_1F1F1F.png'),
                     url_path='/favicon.ico')
 load_dotenv()
@@ -170,5 +172,5 @@ ui.run(
     favicon="/favicon.ico",
     title="Custor Agent",
     reload=True,
-    storage_secret=os.environ.get("STORAGE_SECRET", "default_secret"),
+    storage_secret=str(uuid.uuid4()),
 )

@@ -11,9 +11,9 @@ class AgentPanel(View):
 
         with ui.row().classes("w-full h-full"):
             with ui.column().classes("h-full flex-none"):
-                with ui.button(icon="add") \
+                with ui.button("New", icon="add") \
                         .classes("text-xs") \
-                        .props("padding=xs"):
+                        .props("no-caps"):
                     ui.tooltip("New Session")
 
             with ui.column().classes("h-full flex-1"):

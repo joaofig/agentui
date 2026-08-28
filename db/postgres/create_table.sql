@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS public.agent_context
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT agent_context_pkey PRIMARY KEY (agent_context_id),
     CONSTRAINT agent_context_user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES public.user_login (user_id) MATCH SIMPLE
+        REFERENCES public.user_account (user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS public.agent_message
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT agent_message_pkey PRIMARY KEY (agent_message_id),
     CONSTRAINT agent_message_user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES public.user_login (user_id) MATCH SIMPLE
+        REFERENCES public.user_account (user_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT agent_message_context_id_fkey FOREIGN KEY (agent_context_id)

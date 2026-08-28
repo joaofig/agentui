@@ -2,7 +2,7 @@ from nicegui import ui, app
 
 from src.views.agent_panel import AgentPanel
 from src.tools.user import logout
-from src.viewmodels.agent import AgentViewModel
+from src.viewmodels.agent_context import AgentContextViewModel
 from src.views.admin.admin_panel import AdminPanel
 
 
@@ -29,7 +29,7 @@ class MainView:
                         .classes("h-full w-full"):
 
                     with ui.tab_panel(agent).classes("pl-4 pt-0 pb-0 pr-4"):
-                        agent_vm = AgentViewModel()
+                        agent_vm = AgentContextViewModel()
                         AgentPanel(agent_vm)
 
                     with ui.tab_panel(admin).classes("pl-4 pt-0 pb-0 pr-4"):

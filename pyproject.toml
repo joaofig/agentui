@@ -17,5 +17,7 @@ dependencies = [
     "litellm==1.98.0",
     "pandas>=3.0.5",
     "openpyxl>=3.1.5",
+    "latex2mathml>=3.81.0",
+    "asyncer>=0.0.18",
 ]
 
