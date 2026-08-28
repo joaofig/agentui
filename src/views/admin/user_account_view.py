@@ -2,15 +2,15 @@ from nicegui import app, ui
 
 from src.tools.excel import export_to_excel
 from src.tools.user import is_user_readonly
-from src.viewmodels.user_login import UserLoginViewModel
+from src.viewmodels.user_account import UserAccountViewModel
 from src.viewmodels.view_model import ViewModel
-from src.views.admin.dialogs.user_login_dialog import UserLoginDialog
-from src.views.admin.user_login_grid import UserLoginGrid
+from src.views.admin.dialogs.user_account_dialog import UserAccountDialog
+from src.views.admin.user_account_grid import UserAccountGrid
 from src.views.dialogs.delete_warning_dialog import DeleteWarningDialog
 from src.views.view import View
 
 
-class UserLoginView(View):
+class UserAccountView(View):
     def __init__(self, vm: ViewModel):
         super().__init__(vm)
 
@@ -40,7 +40,7 @@ class UserLoginView(View):
                     ui.tooltip("Export to Excel")
 
             with ui.column().classes("h-full flex-1"):
-                self.grid = UserLoginGrid(vm)
+                self.grid = UserAccountGrid(vm)
 
     async def _on_delete_user(self):
         if not is_user_readonly():
@@ -65,11 +65,11 @@ class UserLoginView(View):
             await self.broadcast("user_list", "load")
 
     async def _show_dialog(self):
-        vm = UserLoginViewModel()
+        vm = UserAccountViewModel()
         vm.created_by = app.storage.user.get("username", "Unknown")
         vm.updated_by = app.storage.user.get("username", "Unknown")
 
-        dialog = UserLoginDialog(vm)
+        dialog = UserAccountDialog(vm)
         result = await dialog.show()
         if result == "save":
             await self.vm.call("load")

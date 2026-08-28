@@ -7,11 +7,11 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from src.dtos.user_login import UserLoginDTO, hash_password
-from src.models.user_login import UserLoginModel
+from src.dtos.user_account import UserAccountDTO, hash_password
+from src.models.user_account import UserAccountModel
 from src.views.main_view import MainView
 from src.tools.user import record_user_activity
-from src.viewmodels.user_login import UserLoginViewModel
+from src.viewmodels.user_account import UserAccountViewModel
 from src.views.admin.dialogs.password_dialog import PasswordDialog
 
 # top-level static routes like /favicon.ico must be unrestricted, otherwise the middleware redirects them to /login
@@ -40,8 +40,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         return RedirectResponse(f"/login?redirect_to={path}")
 
 
-async def change_password(user: UserLoginDTO) -> bool:
-    vm = UserLoginViewModel()
+async def change_password(user: UserAccountDTO) -> bool:
+    vm = UserAccountViewModel()
     vm.copy(user)
     dialog = PasswordDialog(vm)
     result = await dialog.show()
@@ -70,9 +70,9 @@ async def login(redirect_to: str = "/") -> RedirectResponse | None:
             return RedirectResponse("/")
 
     async def try_login() -> None:
-        model = UserLoginModel()
+        model = UserAccountModel()
         pass_hash = hash_password(password.value or "")
-        user: UserLoginDTO | None = await model.get_user(username.value or "user", pass_hash)
+        user: UserAccountDTO | None = await model.get_user(username.value or "user", pass_hash)
 
         if user is not None:
             app.storage.user.update(

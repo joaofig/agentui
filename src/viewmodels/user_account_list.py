@@ -1,14 +1,14 @@
 from typing import Any
 
-from src.models.user_login import UserLoginModel
+from src.models.user_account import UserAccountModel
 from src.tools.observability import GridList
 from src.viewmodels.view_model import ViewModel
 
 
-class UserLoginListViewModel(ViewModel):
+class UserAccountListViewModel(ViewModel):
     users = GridList()
     selected_id: int = 0
-    model: UserLoginModel = UserLoginModel()
+    model: UserAccountModel = UserAccountModel()
 
     def __init__(self):
         super().__init__()

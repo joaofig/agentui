@@ -12,7 +12,7 @@ def hash_password(password: str) -> str:
 USER_ROLES = ["Admin", "User"]
 
 
-class UserLoginDTO(BaseDTO):
+class UserAccountDTO(BaseDTO):
     user_id: int
     user_name: str
     pass_hash: str

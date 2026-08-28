@@ -1,12 +1,12 @@
 from nicegui import ui
 
-from src.dtos.user_login import USER_ROLES
-from src.viewmodels.user_login import UserLoginViewModel
+from src.dtos.user_account import USER_ROLES
+from src.viewmodels.user_account import UserAccountViewModel
 from src.views.view import View
 
 
 class PasswordDialog(View):
-    def __init__(self, vm: UserLoginViewModel):
+    def __init__(self, vm: UserAccountViewModel):
         super().__init__(vm)
         user_vm = vm
 

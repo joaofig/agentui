@@ -4,10 +4,10 @@ from nicegui.observables import ObservableList
 
 from src.viewmodels.view_model import ViewModel
 from src.views.view import View
-from src.viewmodels.user_login import UserLoginViewModel
+from src.viewmodels.user_account import UserAccountViewModel
 
 
-class UserLoginGrid(View):
+class UserAccountGrid(View):
     def __init__(self, vm: ViewModel):
         super().__init__(vm)
 
@@ -87,11 +87,11 @@ class UserLoginGrid(View):
     async def _on_edit(self, event):
         row_data = event.args  # dict with the full row's data
         if row_data:
-            from src.views.admin.dialogs.user_login_dialog import UserLoginDialog
+            from src.views.admin.dialogs.user_account_dialog import UserAccountDialog
 
-            vm = UserLoginViewModel()
+            vm = UserAccountViewModel()
             vm.updated_by = app.storage.user.get("username", "Unknown")
-            dialog = UserLoginDialog(vm)
+            dialog = UserAccountDialog(vm)
             await dialog.vm.call("load", user_id=row_data["user_id"])
             result = await dialog.show()
             if result == "save":

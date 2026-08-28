@@ -3,14 +3,14 @@ from typing import Any
 
 from nicegui import binding
 
-from src.dtos.user_login import UserLoginDTO, hash_password
-from src.models.user_login import UserLoginModel
+from src.dtos.user_account import UserAccountDTO, hash_password
+from src.models.user_account import UserAccountModel
 from src.tools.user import get_user_name
 from src.viewmodels.view_model import ViewModel
 
 
 @binding.bindable_dataclass
-class UserLoginViewModel(ViewModel):
+class UserAccountViewModel(ViewModel):
     user_id: int = 0
     user_name: str = ""
     pass_hash: str = ""
@@ -37,13 +37,13 @@ class UserLoginViewModel(ViewModel):
 
             case "load":
                 if "user_id" in kwargs:
-                    model: UserLoginModel = UserLoginModel()
+                    model: UserAccountModel = UserAccountModel()
                     u = await model.load(user_id=kwargs.get("user_id", 0))
                     if u:
                         self.copy(u)
         return None
 
-    def copy(self, user: UserLoginDTO):
+    def copy(self, user: UserAccountDTO):
         self.user_id = user.user_id
         self.user_name = user.user_name
         self.pass_hash = user.pass_hash
@@ -54,9 +54,9 @@ class UserLoginViewModel(ViewModel):
         self.updated_at = user.updated_at
         self.updated_by = user.updated_by
 
-    def to_dto(self) -> UserLoginDTO:
+    def to_dto(self) -> UserAccountDTO:
         is_old = self.user_id > 0
-        return UserLoginDTO(
+        return UserAccountDTO(
             user_id=self.user_id,
             user_name=self.user_name,
             pass_hash=self.pass_hash,
@@ -72,7 +72,7 @@ class UserLoginViewModel(ViewModel):
         self.pass_hash = hash_password(self.password_1)
         user = self.to_dto()
         user.log_change(self.user_id)
-        model: UserLoginModel = UserLoginModel()
+        model: UserAccountModel = UserAccountModel()
         await model.save(user)
         if user.user_id:
             self.user_id = user.user_id

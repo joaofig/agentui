@@ -1,4 +1,7 @@
+from typing import Self
+
 from src.dtos.base import ReadOnlyDTO
+from tools.user import dict_to_datetime
 
 
 class UserActivityDTO(ReadOnlyDTO):
@@ -8,13 +11,13 @@ class UserActivityDTO(ReadOnlyDTO):
     activity_data: str
 
     @classmethod
-    def from_dict(cls, data: dict) -> "UserActivityDTO":
+    def from_dict(cls, data: dict) -> Self:
         return cls(
             user_activity_id=data.get("user_activity_id", 0),
             user_id=data.get("user_id", 0),
             activity_type=data.get("activity_type", ""),
             activity_data=data.get("activity_data", ""),
-            created_at=data.get("created_at"),
+            created_at=dict_to_datetime(data, "created_at"),
             created_by=data.get("created_by", "system"),
         )
 
@@ -25,4 +28,4 @@ class UserActivityDTO(ReadOnlyDTO):
             "activity_type": self.activity_type,
             "activity_data": self.activity_data,
             **super().to_dict(),
-        } | super().to_dict()
+        }

@@ -2,9 +2,9 @@ from nicegui import ui
 
 from src.tools.tasks import ManagedTasks
 from src.viewmodels.sql import SQLViewModel
-from src.viewmodels.user_login_list import UserLoginListViewModel
+from src.viewmodels.user_account_list import UserAccountListViewModel
 from src.views.admin.sql_view import SQLView
-from src.views.admin.user_login_view import UserLoginView
+from src.views.admin.user_account_view import UserAccountView
 
 
 class AdminPanel:
@@ -17,8 +17,8 @@ class AdminPanel:
                 .classes("w-full h-full"):
             with ui.tab_panel(users) \
                     .classes("pl-0 pt-0 pb-0 pr-0"):
-                vm = UserLoginListViewModel()
-                UserLoginView(vm)
+                vm = UserAccountListViewModel()
+                UserAccountView(vm)
                 ManagedTasks().create(vm.call("load"))
 
             with ui.tab_panel(sql) \
