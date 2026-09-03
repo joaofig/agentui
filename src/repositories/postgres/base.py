@@ -63,6 +63,8 @@ class PostgresRepository:
                 else:
                     # INSERT
                     id_value = await cur.execute(insert, value)
-                    value[row_id] = id_value.fetchone()[0] if id_value else None
+                    result = await id_value.fetchone()
+                    if result:
+                        value[row_id] = result[row_id]
                     await self.conn.commit()
         return value

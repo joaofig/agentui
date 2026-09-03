@@ -26,7 +26,7 @@ ALTER TABLE IF EXISTS public.user_login
 DROP INDEX IF EXISTS public.index_user_activity_user_time;
 
 CREATE UNIQUE INDEX IF NOT EXISTS index_user_activity_user_time
-    ON public.user_login USING btree
+    ON public.user_account USING btree
     (user_name COLLATE pg_catalog."default" ASC NULLS LAST, pass_hash COLLATE pg_catalog."default" ASC NULLS LAST, created_at DESC NULLS FIRST)
     TABLESPACE pg_default;
 -- Index: index_user_login_pass
@@ -34,7 +34,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS index_user_activity_user_time
 DROP INDEX IF EXISTS public.index_user_login_pass;
 
 CREATE UNIQUE INDEX IF NOT EXISTS index_user_login_pass
-    ON public.user_login USING btree
+    ON public.user_account USING btree
     (user_name COLLATE pg_catalog."default" ASC NULLS LAST, pass_hash COLLATE pg_catalog."default" ASC NULLS LAST)
     TABLESPACE pg_default;
 

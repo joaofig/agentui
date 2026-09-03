@@ -4,11 +4,10 @@ from typing import Any
 
 from asyncer import asyncify
 from dotenv import load_dotenv
-from litellm import acompletion
 from nicegui import binding
-
-from models.agent import Agent
-from models.agent_context import AgentContextModel
+from haystack.components.agents import Agent
+from haystack.components.generators.chat import OpenAIChatGenerator
+from haystack.dataclasses import ChatMessage, StreamingChunk
 from src.viewmodels.view_model import ViewModel
 
 
@@ -18,24 +17,25 @@ class AgentContextViewModel(ViewModel):
     response: str = "### Answer Panel \r\n \r\n"
     busy: bool = False
     enabled: bool = True
-    messages: list[dict[str, str]] = field(default_factory=list)
-    context = AgentContextModel()
+    messages: list[ChatMessage] = field(default_factory=list)
 
     def __post_init__(self):
         super().__init__()
 
         load_dotenv()
-        self.api_key = os.getenv("OPENAI_API_KEY", "your_default_api_key_here")
         self.api_url = os.getenv("OPENAI_API_URL", "https://hostyourai.com/api/v1")
+        self.chat_generator = OpenAIChatGenerator(
+            model="moonshotai/Kimi-K3",
+            api_base_url=self.api_url,
+        )
+        system_prompt = """
+            You are a helpful assistant that provides accurate and concise answers to user questions.
+            You are precise and concise. Stay on topic.
+        """
         self.agent = Agent(
-            model="openai/moonshotai/Kimi-K3",
-            callback=self._add_content,
-            api_key=self.api_key,
-            api_url=self.api_url,
-            system_prompt="""
-                You are a helpful assistant that provides accurate and concise answers to user questions.
-                You are precise and concise. Stay on topic.
-            """
+            chat_generator=self.chat_generator,
+            system_prompt=system_prompt,
+            streaming_callback=self._add_content
         )
 
     def _add_prompt_to_response(self, prompt: str) -> None:
@@ -50,19 +50,22 @@ class AgentContextViewModel(ViewModel):
         self.enabled = False
 
         self._add_prompt_to_response(self.prompt)
+        self.messages.append(ChatMessage.from_user(self.prompt))
 
-        await self.agent.send_prompt(self.prompt)
+        result = await self.agent.run_async(self.messages)
+        self.messages.extend(result["messages"])
 
-        self.response += " \r\n \r\n ---  \r\n \r\n"
+        self.response += "---"
+        self.response += "<br /><br />"
 
         self.prompt = ""
         self.enabled = True
         self.busy = False
 
-    def _append_content(self, content: str) -> None:
-        self.response += content
+    def _append_content(self, content: StreamingChunk) -> None:
+        self.response += content.content
 
-    async def _add_content(self, content: str) -> None:
+    async def _add_content(self, content: StreamingChunk) -> None:
         await asyncify(self._append_content)(content)
 
     async def _on_call(self, msg: str, **kwargs) -> Any:
