@@ -1,10 +1,16 @@
+from inspect import isawaitable
+
 from nicegui import ui
+from asyncer import asyncify
 
 from src.viewmodels.view_model import ViewModel
 from src.views.view import View
+from tools.tasks import ManagedTasks
 
 
 class AgentView(View):
+    _md_bound: bool = False
+
     def __init__(self, vm: ViewModel):
         super().__init__(vm)
 
@@ -17,9 +23,12 @@ class AgentView(View):
                         "latex",
                         "fenced-code-blocks",
                         "task-lists",
+                        "code-friendly",
                         "footnotes"]
-                    ui.markdown("", extras=extras).classes("h-full m-4") \
-                            .bind_content_from(vm, "response")
+                    self.md = ui.markdown("", extras=extras).classes("h-full m-4") \
+                        .bind_content_from(self.vm, "response",
+                                           backward=lambda text: self._update_md(text))
+
                 with splitter.after:
                     with ui.row().classes("w-full h-full"):
                         with ui.column().classes("flex-1 h-full"):
@@ -36,4 +45,15 @@ class AgentView(View):
                             ui.spinner(size="lg").bind_visibility_from(vm, "busy")
 
     async def _send_prompt(self):
+        if not self._md_bound:
+            self._md_bound = True
         await self.vm.call("send_prompt")
+
+    async def _scroll_md(self):
+        md = self.md
+        await ui.run_javascript(f'getHtmlElement({md.id}).scrollTop=getHtmlElement({md.id}).scrollHeight')
+
+    def _update_md(self, text: str) -> str:
+        if self._md_bound:
+            asyncify(self._scroll_md)
+        return text

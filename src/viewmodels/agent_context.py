@@ -2,6 +2,7 @@ import os
 from dataclasses import field
 from typing import Any
 
+import openai
 from asyncer import asyncify
 from dotenv import load_dotenv
 from nicegui import binding
@@ -52,11 +53,13 @@ class AgentContextViewModel(ViewModel):
         self._add_prompt_to_response(self.prompt)
         self.messages.append(ChatMessage.from_user(self.prompt))
 
-        result = await self.agent.run_async(self.messages)
-        self.messages.extend(result["messages"])
-
-        self.response += "---"
-        self.response += "<br /><br />"
+        try:
+            result = await self.agent.run_async(self.messages)
+            self.messages.extend(result["messages"])
+        except openai.APIError as e:
+            self.response += f"<div style='color: red;'>{e}</div>"
+        finally:
+            self.response += "<br /><br />"
 
         self.prompt = ""
         self.enabled = True
