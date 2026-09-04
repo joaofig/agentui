@@ -20,5 +20,6 @@ dependencies = [
     "asyncer>=0.0.18",
     "haystack-ai>=3.1.0",
     "pgvector-haystack>=6.6.0",
+    "mcp-haystack>=1.5.1",
 ]
 
