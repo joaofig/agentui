@@ -1,11 +1,8 @@
-from inspect import isawaitable
-
 from nicegui import ui
 from asyncer import asyncify
 
 from src.viewmodels.view_model import ViewModel
 from src.views.view import View
-from tools.tasks import ManagedTasks
 
 
 class AgentView(View):
@@ -14,8 +11,8 @@ class AgentView(View):
     def __init__(self, vm: ViewModel):
         super().__init__(vm)
 
-        with ui.column().classes("w-full h-screen"):
-            with ui.splitter(horizontal=True).classes("w-full h-full") as splitter:
+        with ui.column().classes("w-full h-full"):
+            with ui.splitter(horizontal=True, value=70).classes("w-full h-full") as splitter:
                 with splitter.before, ui.row().classes("w-full h-full"):
                     extras = [
                         "markdown-in-html",
@@ -39,7 +36,7 @@ class AgentView(View):
                                 .bind_value(vm, "prompt") \
                                 .bind_enabled_from(vm, "enabled")
 
-                        with ui.column().classes("flex-none h-full"):
+                        with ui.column().classes("flex-none"):
                             ui.button("Submit", on_click=self._send_prompt) \
                                 .classes("m-4")
                             ui.spinner(size="lg").bind_visibility_from(vm, "busy")
