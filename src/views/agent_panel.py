@@ -1,8 +1,8 @@
 from nicegui import ui
 
-from src.viewmodels.view_model import ViewModel
+from nicemvvm.viewmodels.view_model import ViewModel
+from nicemvvm.views.view import View
 from src.views.agent_view import AgentView
-from src.views.view import View
 
 
 class AgentPanel(View):

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from src.tools.user import get_user_name
+from nicemvvm.tools.user import get_user_name
 
 
 class ReadOnlyDTO(BaseModel):

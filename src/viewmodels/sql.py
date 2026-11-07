@@ -4,9 +4,9 @@ from nicegui import binding
 from psycopg import AsyncConnection, Column
 from psycopg.errors import Error
 
+from nicemvvm.viewmodels.view_model import ViewModel
 from src.repositories.postgres.base import PostgresCentral
 from src.tools.observability import GridList
-from src.viewmodels.view_model import ViewModel
 
 
 async def run_query(query: str) -> tuple[list[dict[str, Any]], list[Column] | None]:

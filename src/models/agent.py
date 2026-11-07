@@ -2,7 +2,6 @@ import os
 from typing import Callable, Awaitable
 
 from dotenv import load_dotenv
-from litellm import acompletion
 
 
 class Agent:
@@ -33,33 +32,3 @@ class Agent:
 
     async def send_prompt(self, prompt: str) -> None:
         self.messages.append({'role': 'user', 'content': prompt})
-
-        response = await acompletion(
-            model=self.model,
-            messages=self.messages,
-            base_url=self.api_url,
-            api_key=self.api_key,
-            stream=True
-        )
-
-        content = ""
-        try:
-            async for chunk in response:
-                if chunk.choices[0].delta.content:
-                    delta = str(chunk.choices[0].delta.content)
-                    content += delta
-                    await self.callback(delta)
-
-        finally:
-            aclose = getattr(response, "aclose", None)
-            if aclose is not None:
-                await aclose()
-
-        self.messages.append({"role": "assistant", "content": content})
-
-        # content = response.choices[0].message.content
-        # if content:
-        #     self.messages.append({"role": "assistant", "content": content})
-        #     result = self.callback(content=content)
-        #     if inspect.isawaitable(result):
-        #         await result

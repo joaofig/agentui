@@ -2,8 +2,8 @@ from nicegui import app, ui
 from nicegui.elements.aggrid import AgGrid
 from nicegui.observables import ObservableList
 
-from src.viewmodels.view_model import ViewModel
-from src.views.view import View
+from nicemvvm.viewmodels.view_model import ViewModel
+from nicemvvm.views.view import View
 from src.viewmodels.user_account import UserAccountViewModel
 
 

@@ -1,7 +1,7 @@
 from nicegui import ui, app
 
+from nicemvvm.tools.user import logout
 from src.views.agent_panel import AgentPanel
-from src.tools.user import logout
 from src.viewmodels.agent_context import AgentContextViewModel
 from src.views.admin.admin_panel import AdminPanel
 

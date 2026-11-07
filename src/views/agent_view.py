@@ -1,8 +1,8 @@
 from nicegui import ui
 from asyncer import asyncify
 
-from src.viewmodels.view_model import ViewModel
-from src.views.view import View
+from nicemvvm.viewmodels.view_model import ViewModel
+from nicemvvm.views.view import View
 
 
 class AgentView(View):

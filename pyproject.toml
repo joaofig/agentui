@@ -23,3 +23,14 @@ dependencies = [
     "mcp-haystack>=1.5.1",
 ]
 
+[tool.ruff]
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.uv.sources]
+nicemvvm = { path = "../nicemvvm", editable = true }

@@ -8,10 +8,10 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
+from nicemvvm.tools.user import record_user_activity
 from src.dtos.user_account import UserAccountDTO, hash_password
 from src.models.user_account import UserAccountModel
 from src.views.main_view import MainView
-from src.tools.user import record_user_activity
 from src.viewmodels.user_account import UserAccountViewModel
 from src.views.admin.dialogs.password_dialog import PasswordDialog
 

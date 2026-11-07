@@ -15,7 +15,7 @@ from src.viewmodels.view_model import ViewModel
 @binding.bindable_dataclass
 class AgentContextViewModel(ViewModel):
     prompt: str = ""
-    response: str = "### Answer Panel \r\n \r\n"
+    response: str = ""
     busy: bool = False
     enabled: bool = True
     messages: list[ChatMessage] = field(default_factory=list)
