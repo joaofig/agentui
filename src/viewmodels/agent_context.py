@@ -9,7 +9,8 @@ from nicegui import binding
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage, StreamingChunk
-from src.viewmodels.view_model import ViewModel
+
+from nicemvvm.viewmodels.view_model import ViewModel
 
 
 @binding.bindable_dataclass
