@@ -35,7 +35,7 @@ requires-dist = [
     { name = "httpcore2", extras = ["asyncio"], specifier = ">=2.12.0" },
     { name = "latex2mathml", specifier = ">=3.81.0" },
     { name = "mcp-haystack", specifier = ">=1.5.1" },
-    { name = "nicegui", specifier = ">=3.16.0" },
+    { name = "nicegui", specifier = ">=4.0.0" },
     { name = "openpyxl", specifier = ">=3.1.5" },
     { name = "pandas", specifier = ">=3.0.5" },
     { name = "pgvector-haystack", specifier = ">=6.6.0" },

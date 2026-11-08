@@ -6,21 +6,22 @@ check:
 
 podman-run:
 	podman run \
-		--name custor-agent \
+		--name ai-agent \
 		-e POSTGRES_USER=postgres \
 		-e POSTGRES_DB=postgres \
-		-e POSTGRES_PASSWORD=custor-agent \
-		-p 5433:5432 \
+		-e POSTGRES_PASSWORD=ai-agent \
+		-p 5434:5432 \
 		-v postgres-volume:/Users/joaofig/data/postgres \
 		-d pgvector/pgvector:pg17-trixie
 
 docker-run:
-	docker run --rm \
-		--name custor-agent \
+	docker run \
+		--name ai-agent \
 		-e POSTGRES_USER=postgres \
 		-e POSTGRES_DB=postgres \
-		-e POSTGRES_PASSWORD=custor-agent \
-		-p 5433:5432 \
+		-e POSTGRES_PASSWORD=ai-agent \
+		-p 5434:5432 \
+		-v postgres-volume:/Users/joaofig/data/postgres \
 		-d pgvector/pgvector:pg17-trixie
 
 prune-docker:
