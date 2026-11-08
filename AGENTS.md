@@ -2,7 +2,8 @@
 
 ## Project Setup and Management
 
-- Python version: 3.13. Don't use newer syntax.
+- Python version: 3.14+. Don't use syntax newer than the pinned
+  version in `.python-version`.
 - Dependency management: `uv` and `pyproject.toml`. Never use `pip`
   or a `requirements.txt` file.
 - Add a dependency with `uv add <package>`. Never use `uv pip`
