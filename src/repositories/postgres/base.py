@@ -3,7 +3,7 @@ from typing import LiteralString
 from psycopg import AsyncConnection, rows
 
 from src.repositories.postgres.client import get_postgres_client
-from src.tools.singleton import singleton
+from nicemvvm.tools.singleton import singleton
 
 
 @singleton

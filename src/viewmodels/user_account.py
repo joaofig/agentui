@@ -3,10 +3,10 @@ from typing import Any
 
 from nicegui import binding
 
+from nicemvvm.tools.user import get_user_name
 from nicemvvm.viewmodels.view_model import ViewModel
 from src.dtos.user_account import UserAccountDTO, hash_password
 from src.models.user_account import UserAccountModel
-from src.tools.user import get_user_name
 
 
 @binding.bindable_dataclass

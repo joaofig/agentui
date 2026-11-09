@@ -3,7 +3,7 @@ from nicegui.binding import bind_from
 
 from nicemvvm.viewmodels.view_model import ViewModel
 from nicemvvm.views.view import View
-from src.tools.excel import export_to_excel
+from nicemvvm.tools.excel import export_to_excel
 from src.views.admin.sql_grid import SQLGrid
 
 

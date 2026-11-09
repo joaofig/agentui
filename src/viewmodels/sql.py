@@ -6,7 +6,7 @@ from psycopg.errors import Error
 
 from nicemvvm.viewmodels.view_model import ViewModel
 from src.repositories.postgres.base import PostgresCentral
-from src.tools.observability import GridList
+from nicemvvm.tools.observability import GridList
 
 
 async def run_query(query: str) -> tuple[list[dict[str, Any]], list[Column] | None]:

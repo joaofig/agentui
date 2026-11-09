@@ -2,7 +2,7 @@ from typing import Any
 
 from nicemvvm.viewmodels.view_model import ViewModel
 from src.models.user_account import UserAccountModel
-from src.tools.observability import GridList
+from nicemvvm.tools.observability import GridList
 
 
 class UserAccountListViewModel(ViewModel):
