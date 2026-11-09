@@ -1,19 +1,29 @@
 -- Table: org_account
 
-DROP TABLE IF EXISTS org_account CASCADE;
+DROP TABLE IF EXISTS organization_account CASCADE;
 
-CREATE TABLE IF NOT EXISTS org_account
+CREATE TABLE IF NOT EXISTS organization_account
 (
     org_id bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1 ),
     org_name character varying(128) COLLATE pg_catalog."default" NOT NULL,
 
-    created_on timestamp without time zone NOT NULL DEFAULT now(),
+    created_on timestamp with time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    updated_on timestamp without time zone NOT NULL DEFAULT now(),
-    updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    updated_on timestamp with time zone NOT NULL DEFAULT now(),
+    updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL
 )
 
 TABLESPACE pg_default;
+
+INSERT INTO organization_account
+    (org_name, created_by, updated_by)
+VALUES
+    ('root', 'root', 'root');
+
+INSERT INTO organization_account
+    (org_name, created_by, updated_by)
+VALUES
+    ('Demo', 'root', 'root');
 
 
 -- Table: user_account
@@ -28,22 +38,22 @@ CREATE TABLE IF NOT EXISTS user_account
     pass_hash character varying(64) COLLATE pg_catalog."default" NOT NULL,
     user_role character varying(64) COLLATE pg_catalog."default" NOT NULL,
     change_pass boolean NOT NULL DEFAULT false,
-    created_at timestamp without time zone NOT NULL DEFAULT now(),
+
+    created_on timestamp with time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
-    updated_at timestamp without time zone NOT NULL DEFAULT now(),
+    updated_on timestamp with time zone NOT NULL DEFAULT now(),
     updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
+
     CONSTRAINT user_pkey PRIMARY KEY (user_id),
     CONSTRAINT user_user_name_key UNIQUE (user_name),
     CONSTRAINT org_id_org_account_fkey FOREIGN KEY (org_id)
-        REFERENCES org_account (org_id) MATCH SIMPLE
+        REFERENCES organization_account (org_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS user_account
-    OWNER to postgres;
 
 -- Index: index_user_activity_user_time
 
@@ -71,7 +81,7 @@ VALUES
     (
      1,
      'admin',
-     'b4074c85261b5b773355468f302cf31d9e4c259d250cad9328f26701ffa47981',
+     '',
      'Admin',
      false,
      now(),
@@ -79,6 +89,40 @@ VALUES
      now(),
      'root'
     );
+
+
+CREATE TABLE IF NOT EXISTS chat_thread
+(
+    chat_id     bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id     bigint NOT NULL REFERENCES user_account (user_id),
+    title       text NOT NULL DEFAULT '',
+
+    created_on timestamp with time zone NOT NULL DEFAULT now(),
+    created_by character varying(64) COLLATE pg_catalog."default" NOT NULL default 'admin',
+    updated_on timestamp with time zone NOT NULL DEFAULT now(),
+    updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL default 'admin'
+);
+
+CREATE INDEX IF NOT EXISTS chat_user_updated_idx ON chat_thread (user_id, updated_on);
+
+
+CREATE TABLE IF NOT EXISTS chat_message
+(
+    chat_message_id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    chat_id         bigint NOT NULL REFERENCES chat_thread (chat_id) ON DELETE CASCADE,
+    role            varchar(16) NOT NULL,
+    content         text NOT NULL,
+    sources         jsonb NOT NULL DEFAULT '[]'::jsonb,
+    status          varchar(32) NOT NULL DEFAULT '',
+
+    created_on timestamp with time zone NOT NULL DEFAULT now(),
+    created_by character varying(64) COLLATE pg_catalog."default" NOT NULL default 'admin',
+    updated_on timestamp with time zone NOT NULL DEFAULT now(),
+    updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL default 'admin'
+);
+
+CREATE INDEX IF NOT EXISTS chat_message_chat_idx ON chat_message (chat_id, chat_message_id);
+
 
 
 --------------------------------------------------
@@ -93,8 +137,10 @@ CREATE TABLE IF NOT EXISTS user_activity
     user_id bigint NOT NULL,
     user_name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     user_action character varying(256) COLLATE pg_catalog."default" NOT NULL,
-    created_at timestamp without time zone NOT NULL DEFAULT now(),
+
+    created_on timestamp with time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
+
     CONSTRAINT user_activity_pkey PRIMARY KEY (user_activity_id),
     CONSTRAINT user_activity_user_id_fkey FOREIGN KEY (user_id)
         REFERENCES user_account (user_id) MATCH SIMPLE
