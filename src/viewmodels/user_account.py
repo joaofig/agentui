@@ -49,9 +49,9 @@ class UserAccountViewModel(ViewModel):
         self.pass_hash = user.pass_hash
         self.user_role = user.user_role
         self.change_pass = user.change_pass
-        self.created_at = user.created_at
+        self.created_at = user.created_on
         self.created_by = user.created_by
-        self.updated_at = user.updated_at
+        self.updated_at = user.updated_on
         self.updated_by = user.updated_by
 
     def to_dto(self) -> UserAccountDTO:
@@ -61,9 +61,9 @@ class UserAccountViewModel(ViewModel):
             user_name=self.user_name,
             pass_hash=self.pass_hash,
             user_role=self.user_role,
-            created_at=self.created_at if is_old else datetime.now(),
+            created_on=self.created_at if is_old else datetime.now(),
             created_by=self.created_by if is_old else get_user_name(),
-            updated_at=datetime.now(),
+            updated_on=datetime.now(),
             updated_by=get_user_name(),
             change_pass=self.change_pass,
         )

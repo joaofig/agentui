@@ -17,7 +17,7 @@ class UserActivityDTO(ReadOnlyDTO):
             user_id=data.get("user_id", 0),
             activity_type=data.get("activity_type", ""),
             activity_data=data.get("activity_data", ""),
-            created_at=dict_to_datetime(data, "created_at"),
+            created_on=dict_to_datetime(data, "created_at"),
             created_by=data.get("created_by", "system"),
         )
 
