@@ -4,8 +4,10 @@ from asyncer import asyncify
 from nicemvvm.viewmodels.view_model import ViewModel
 from nicemvvm.views.view import View
 
+from views.thread_view import ChatThreadView
 
-class AgentView(View):
+
+class ChatView(View):
     _md_bound: bool = False
 
     def __init__(self, vm: ViewModel):
@@ -14,7 +16,7 @@ class AgentView(View):
         with ui.column().classes("w-full h-full"):
             with ui.splitter(horizontal=True, value=70).classes("w-full h-full") as splitter:
                 with splitter.before, ui.row().classes("w-full h-full"):
-                    self.chat_thread = ui.column().classes("w-full h-full")
+                    self.chat_thread = ChatThreadView(vm, "w-full h-full")
                     # extras = [
                     #     "markdown-in-html",
                     #     "tables",
