@@ -98,7 +98,7 @@ async def login(redirect_to: str = "/") -> RedirectResponse | None:
         else:
             ui.notify("Wrong username or password", color="negative")
 
-    ui.label("Custor Agent").classes("text-h2 text-center w-full")
+    ui.label("AI Agent").classes("text-h2 text-center w-full")
 
     with ui.card().classes("absolute-center items-stretch"):
         username = (

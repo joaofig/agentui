@@ -27,9 +27,9 @@ class UserAccountDTO(BaseDTO):
             pass_hash=data.get("pass_hash", ""),
             user_role=data.get("user_role", ""),
             change_pass=data.get("change_pass", False),
-            created_on=dict_to_datetime(data, "created_at"),
+            created_on=dict_to_datetime(data, "created_on"),
             created_by=data.get("created_by", "system"),
-            updated_on=dict_to_datetime(data, "updated_at"),
+            updated_on=dict_to_datetime(data, "updated_on"),
             updated_by=data.get("updated_by", "system"),
         )
 
