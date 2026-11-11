@@ -1,4 +1,4 @@
-from typing import LiteralString
+from typing import LiteralString, Any
 
 from psycopg import AsyncConnection, rows
 
@@ -26,7 +26,8 @@ class PostgresRepository:
         self.conn = await PostgresCentral().connect()
         return self.conn
 
-    async def execute_query(self, sql: LiteralString, params: tuple | list | None = None) -> list[dict]:
+    async def execute_query(self, sql: LiteralString, params: tuple | list | None = None) -> list[tuple[Any, ...]] | \
+                                                                                             list[dict[Any, Any]]:
         await self.connect()
         if self.conn:
             async with self.conn.cursor() as cur:

@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS organization_account
     created_on timestamp with time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     updated_on timestamp with time zone NOT NULL DEFAULT now(),
-    updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL
+    updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
+
+    CONSTRAINT org_pkey PRIMARY KEY (org_id)
 )
 
 TABLESPACE pg_default;
@@ -55,16 +57,6 @@ CREATE TABLE IF NOT EXISTS user_account
 TABLESPACE pg_default;
 
 
--- Index: index_user_activity_user_time
-
-DROP INDEX IF EXISTS index_user_activity_user_time;
-
-CREATE UNIQUE INDEX IF NOT EXISTS index_user_activity_user_time
-    ON user_account USING btree
-    (user_name COLLATE pg_catalog."default" ASC NULLS LAST, pass_hash COLLATE pg_catalog."default" ASC NULLS LAST, created_at DESC NULLS FIRST)
-    TABLESPACE pg_default;
--- Index: index_user_login_pass
-
 DROP INDEX IF EXISTS index_user_login_pass;
 
 CREATE UNIQUE INDEX IF NOT EXISTS index_user_login_pass
@@ -73,15 +65,20 @@ CREATE UNIQUE INDEX IF NOT EXISTS index_user_login_pass
     TABLESPACE pg_default;
 
 
+-- Use the `hash_password` to generate a password hash for the insert statement below:
+-- import hashlib
+-- def hash_password(password: str) -> str:
+--     return hashlib.sha256(password.encode()).hexdigest()
+--
 INSERT INTO user_account
     (
-     org_id, user_name, pass_hash, user_role, change_pass, created_at, created_by, updated_at, updated_by
+     org_id, user_name, pass_hash, user_role, change_pass, created_on, created_by, updated_on, updated_by
     )
 VALUES
     (
      1,
      'admin',
-     '',
+     'c1f78a0a51c1bb6b1a3e52b2343f6c1ceed92cf436ab53dc4eebc008182739e8',    -- 'ai-agent'
      'Admin',
      false,
      now(),

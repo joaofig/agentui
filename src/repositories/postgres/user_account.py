@@ -12,7 +12,7 @@ class UserAccountRepository(PostgresRepository):
     async def get_user(self, user_name: str, pass_hash: str) -> UserAccountDTO | None:
         sql: LiteralString = """
         SELECT  user_id, user_name, pass_hash, user_role, change_pass,
-                created_at, created_by, updated_at, updated_by
+                created_on, created_by, updated_on, updated_by
         FROM    user_account
         WHERE   user_name = %s AND pass_hash = %s
         """
@@ -24,7 +24,7 @@ class UserAccountRepository(PostgresRepository):
     async def list(self) -> builtins.list[UserAccountDTO]:
         sql: LiteralString = """
         SELECT  user_id, user_name, pass_hash, user_role, change_pass,
-                created_at, created_by, updated_at, updated_by
+                created_on, created_by, updated_on, updated_by
         FROM    user_account
         """
         result = await self.execute_query(sql)
@@ -33,7 +33,7 @@ class UserAccountRepository(PostgresRepository):
     async def load(self, user_id: int) -> UserAccountDTO | None:
         sql: LiteralString = """
         SELECT  user_id, user_name, pass_hash, user_role, change_pass,
-                created_at, created_by, updated_at, updated_by
+                created_on, created_by, updated_on, updated_by
         FROM    user_account
         WHERE   user_id = %s
         """
@@ -45,9 +45,9 @@ class UserAccountRepository(PostgresRepository):
     async def save(self, user: UserAccountDTO) -> dict:
         insert: LiteralString = """
         INSERT INTO user_account (user_name, pass_hash, user_role, change_pass,
-                          created_at, created_by, updated_at, updated_by)
+                          created_on, created_by, updated_on, updated_by)
         VALUES (%(user_name)s, %(pass_hash)s, %(user_role)s, %(change_pass)s, 
-                %(created_at)s, %(created_by)s, %(updated_at)s, %(updated_by)s)
+                %(created_on)s, %(created_by)s, %(updated_on)s, %(updated_by)s)
         RETURNING user_id
         """
         update: LiteralString = """

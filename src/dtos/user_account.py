@@ -27,9 +27,9 @@ class UserAccountDTO(BaseDTO):
             pass_hash=data.get("pass_hash", ""),
             user_role=data.get("user_role", ""),
             change_pass=data.get("change_pass", False),
-            created_at=dict_to_datetime(data, "created_at"),
+            created_on=dict_to_datetime(data, "created_on"),
             created_by=data.get("created_by", "system"),
-            updated_at=dict_to_datetime(data, "updated_at"),
+            updated_on=dict_to_datetime(data, "updated_on"),
             updated_by=data.get("updated_by", "system"),
         )
 
@@ -39,9 +39,9 @@ class UserAccountDTO(BaseDTO):
             "user_name": self.user_name,
             "pass_hash": self.pass_hash,
             "user_role": self.user_role,
-            "created_at": self.created_at.isoformat(),
+            "created_at": self.created_on.isoformat(),
             "created_by": self.created_by,
-            "updated_at": self.updated_at.isoformat(),
+            "updated_at": self.updated_on.isoformat(),
             "updated_by": self.updated_by,
             "change_pass": self.change_pass,
         }

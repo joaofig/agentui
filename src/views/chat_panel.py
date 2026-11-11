@@ -2,10 +2,10 @@ from nicegui import ui
 
 from nicemvvm.viewmodels.view_model import ViewModel
 from nicemvvm.views.view import View
-from src.views.agent_view import AgentView
+from src.views.chat_view import ChatView
 
 
-class AgentPanel(View):
+class ChatPanel(View):
     def __init__(self, vm: ViewModel):
         super().__init__(vm)
 
@@ -17,4 +17,4 @@ class AgentPanel(View):
                     ui.tooltip("New Session")
 
             with ui.column().classes("h-full flex-1"):
-                AgentView(vm)
+                ChatView(vm)

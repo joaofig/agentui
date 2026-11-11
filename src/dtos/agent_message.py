@@ -21,7 +21,7 @@ class AgentMessageDTO(ReadOnlyDTO):
             user_name=data.get("user_name", ""),
             role=data.get("role", ""),
             content=data.get("content", ""),
-            created_at=dict_to_datetime(data, "created_at"),
+            created_on=dict_to_datetime(data, "created_at"),
             created_by=data.get("created_by", "system"),
         )
 
