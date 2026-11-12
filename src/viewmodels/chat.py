@@ -16,12 +16,16 @@ class ChatViewModel(ViewModel):
         self.prompt: str = ""
         self.chat_agent = ChatAgent()
         self.chat_agent.subscribe("stream_reply", self._on_stream_reply)
-        self.chat_agent.subscribe("final_reply", self._on_final_reply)
+        self.chat_agent.subscribe("reply", self._on_final_reply)
+        self.enabled: bool = True
+        self.busy: bool = False
 
     async def _on_call(self, msg: str, **kwargs) -> Any:
         match msg:
             case "ask":
                 if self.prompt:
+                    self.enabled = False
+                    self.busy = True
                     self.thread.append(ChatMessage.from_user(self.prompt))
                     await self.chat_agent.ask_async(self.prompt)
         return None
@@ -37,3 +41,6 @@ class ChatViewModel(ViewModel):
             reply = cast(ChatMessage, kwargs["reply"])
             if reply:
                 self.thread.append(reply)
+        self.prompt = ""
+        self.enabled = True
+        self.busy = False

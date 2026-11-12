@@ -39,13 +39,13 @@ class ChatThreadView(View):
 
         with self.thread:
             for message in self.thread_list:
-                if isinstance(ChatMessage, message):
-                    chat_msg = cast(ChatMessage, message)
-                    match chat_msg.role:
+                chat_msg = cast(ChatMessage, message)
+                match chat_msg.role:
 
-                        case ChatRole.USER:
-                            with ui.card().tight():
-                                ui.markdown(chat_msg.text or "", extras=MD_EXTRAS)
-
-                        case ChatRole.ASSISTANT:
+                    case ChatRole.USER:
+                        with ui.card():
                             ui.markdown(chat_msg.text or "", extras=MD_EXTRAS)
+
+                    case ChatRole.ASSISTANT:
+                        ui.markdown(chat_msg.text or "", extras=MD_EXTRAS)
+        self.thread.scroll_to(percent=1.0)

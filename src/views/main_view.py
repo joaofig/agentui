@@ -2,8 +2,8 @@ from nicegui import ui, app
 
 from nicemvvm.tools.user import logout
 from src.views.chat_panel import ChatPanel
-from src.viewmodels.agent_context import AgentContextViewModel
 from src.views.admin.admin_panel import AdminPanel
+from src.viewmodels.chat import ChatViewModel
 
 
 class MainView:
@@ -28,8 +28,8 @@ class MainView:
                     .classes("h-full w-full"):
 
                 with ui.tab_panel(agent).classes("pl-4 pt-0 pb-0 pr-4"):
-                    agent_vm = AgentContextViewModel()
-                    ChatPanel(agent_vm)
+                    chat_vm = ChatViewModel()
+                    ChatPanel(chat_vm)
 
                 with ui.tab_panel(admin).classes("pl-4 pt-0 pb-0 pr-4"):
                     if user_role == "Admin":

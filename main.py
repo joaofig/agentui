@@ -157,7 +157,7 @@ def index():
     """)
 
     context.client.content.classes("p-0")
-    ui.page_title("Custor Agent")
+    ui.page_title("AI Agent")
     add_inactivity_timeout(300, logout)  # 5 minutes of inactivity
     MainView()
 
@@ -169,7 +169,7 @@ ui.run(
     host="0.0.0.0",
     port=int(os.environ.get("PORT", 8080)),
     favicon="/favicon.ico",
-    title="Custor Agent",
+    title="AI Agent",
     reload=True,
     storage_secret=str(uuid.uuid4()),
 )

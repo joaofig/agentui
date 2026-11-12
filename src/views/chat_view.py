@@ -8,7 +8,7 @@ from views.thread_view import ChatThreadView
 
 
 class ChatView(View):
-    _md_bound: bool = False
+    # _md_bound: bool = False
 
     def __init__(self, vm: ViewModel):
         super().__init__(vm)
@@ -45,15 +45,15 @@ class ChatView(View):
                             ui.spinner(size="lg").bind_visibility_from(vm, "busy")
 
     async def _send_prompt(self):
-        if not self._md_bound:
-            self._md_bound = True
-        await self.vm.call("send_prompt")
-
-    async def _scroll_md(self):
-        md = self.md
-        await ui.run_javascript(f'getHtmlElement({md.id}).scrollTop=getHtmlElement({md.id}).scrollHeight')
-
-    def _update_md(self, text: str) -> str:
-        if self._md_bound:
-            asyncify(self._scroll_md)
-        return text
+        # if not self._md_bound:
+        #     self._md_bound = True
+        await self.vm.call("ask")
+    #
+    # async def _scroll_md(self):
+    #     md = self.md
+    #     await ui.run_javascript(f'getHtmlElement({md.id}).scrollTop=getHtmlElement({md.id}).scrollHeight')
+    #
+    # def _update_md(self, text: str) -> str:
+    #     if self._md_bound:
+    #         asyncify(self._scroll_md)
+    #     return text

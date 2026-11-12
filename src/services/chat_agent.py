@@ -50,7 +50,7 @@ class ChatAgent:
             # the Agent re-adds system_prompt on every run.
             self.messages = [m for m in result["messages"] if not m.is_from(ChatRole.SYSTEM)]
 
-            await self.messenger.broadcast("reply", result=self.messages[-1])
+            await self.messenger.broadcast("reply", reply=self.messages[-1])
 
         except Exception as exc:  # noqa: BLE001  # keep the REPL alive on API/tool errors
             self.messages.pop()
