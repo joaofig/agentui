@@ -1,4 +1,4 @@
-from typing import cast
+from typing import cast, Any
 
 from haystack.dataclasses import ChatMessage, ChatRole
 from nicegui import ui
@@ -48,4 +48,14 @@ class ChatThreadView(View):
 
                     case ChatRole.ASSISTANT:
                         ui.markdown(chat_msg.text or "", extras=MD_EXTRAS)
+
+            # This markdown is used to display the stream text, hidden when not used
+            ui.markdown("", extras=MD_EXTRAS) \
+                .bind_content_from(self.vm, "stream_text", backward=self._update_scroll) \
+                .bind_visibility_from(self.vm, "stream_visible")
         self.thread.scroll_to(percent=1.0)
+
+    def _update_scroll(self, a: Any) -> Any:
+        if len(a) > 0:
+            self.thread.scroll_to(percent=1.0)
+        return a

@@ -14,6 +14,8 @@ class ChatViewModel(ViewModel):
 
         self.thread = GridList()
         self.prompt: str = ""
+        self.stream_text: str = ""
+        self.stream_visible: bool = False
         self.chat_agent = ChatAgent()
         self.chat_agent.subscribe("stream_reply", self._on_stream_reply)
         self.chat_agent.subscribe("reply", self._on_final_reply)
@@ -26,15 +28,19 @@ class ChatViewModel(ViewModel):
                 if self.prompt:
                     self.enabled = False
                     self.busy = True
+                    self.stream_text = ""
+                    self.stream_visible = True
                     self.thread.append(ChatMessage.from_user(self.prompt))
                     await self.chat_agent.ask_async(self.prompt)
         return None
 
     async def _on_stream_reply(self, **kwargs):
+        # print(kwargs)
         if "chunk" in kwargs:
             chunk = cast(StreamingChunk, kwargs["chunk"])
             if chunk:
-                pass
+                self.stream_text += chunk.content
+                self.stream_visible = True
 
     async def _on_final_reply(self, **kwargs):
         if "reply" in kwargs:
@@ -44,3 +50,5 @@ class ChatViewModel(ViewModel):
         self.prompt = ""
         self.enabled = True
         self.busy = False
+        self.stream_text = ""
+        self.stream_visible = False
