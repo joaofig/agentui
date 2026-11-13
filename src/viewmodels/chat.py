@@ -1,12 +1,14 @@
 from typing import Any, cast
 
 from haystack.dataclasses import StreamingChunk, ChatMessage, ChatRole
+from nicegui import binding
 from nicemvvm.tools.observability import GridList
 from nicemvvm.viewmodels.view_model import ViewModel
 
 from services.chat_agent import ChatAgent
 
 
+@binding.bindable_dataclass
 class ChatViewModel(ViewModel):
 
     def __init__(self):

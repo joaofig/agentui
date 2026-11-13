@@ -1,13 +1,15 @@
 from typing import Any
 
+from nicegui import binding
 from nicemvvm.viewmodels.view_model import ViewModel
 from src.models.user_account import UserAccountModel
 from nicemvvm.tools.observability import GridList
 
 
+@binding.bindable_dataclass
 class UserAccountListViewModel(ViewModel):
-    users = GridList()
     selected_id: int = 0
+    users = GridList()
     model: UserAccountModel = UserAccountModel()
 
     def __init__(self):
