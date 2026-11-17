@@ -26,7 +26,7 @@ class UserAccountView(View):
 
                 with (
                     ui.button(icon="delete", on_click=self._on_delete_user)
-                    .bind_enabled(vm, "selected_id")
+                    .bind_enabled(vm, "delete_enabled")
                     .classes("text-xs")
                     .props("padding=xs color=red")
                 ):

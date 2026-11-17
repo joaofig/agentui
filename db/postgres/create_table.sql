@@ -88,6 +88,20 @@ VALUES
     );
 
 
+--------------------------------------------------
+--
+-- Table: rag_document
+--
+CREATE TABLE IF NOT EXISTS rag_document
+(
+    rag_doc_id      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    org_id          bigint NOT NULL,
+    file_name       character varying(256) NOT NULL DEFAULT '',
+    content_type    character varying(64) NOT NULL DEFAULT ''
+);
+
+
+
 CREATE TABLE IF NOT EXISTS chat_thread
 (
     chat_id     bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -154,7 +168,7 @@ ALTER TABLE IF EXISTS public.user_activity
 --------------------------------------------------
 --
 -- Table: public.agent_context
-
+--
 DROP TABLE IF EXISTS public.agent_context CASCADE;
 
 CREATE TABLE IF NOT EXISTS public.agent_context
