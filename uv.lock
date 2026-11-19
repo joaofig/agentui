@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.14"
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -15,6 +15,7 @@ dependencies = [
     { name = "asyncer" },
     { name = "haystack-ai" },
     { name = "httpcore2", extra = ["asyncio"] },
+    { name = "httpx" },
     { name = "latex2mathml" },
     { name = "mcp-haystack" },
     { name = "nicegui" },
@@ -34,6 +35,7 @@ requires-dist = [
     { name = "asyncer", specifier = ">=0.0.18" },
     { name = "haystack-ai", specifier = ">=3.1.0" },
     { name = "httpcore2", extras = ["asyncio"], specifier = ">=2.12.0" },
+    { name = "httpx", specifier = ">=0.28.1" },
     { name = "latex2mathml", specifier = ">=3.81.0" },
     { name = "mcp-haystack", specifier = ">=1.5.1" },
     { name = "nicegui", specifier = ">=4.0.0" },
