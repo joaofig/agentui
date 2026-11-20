@@ -8,7 +8,7 @@ from haystack.dataclasses import ChatMessage, ChatRole, StreamingChunk
 from haystack.utils import Secret
 from nicemvvm.tools.messenger import Messenger
 
-from src.services.mojeek_search import mojeek_search
+from src.services.mojeek_search import create_mojeek_search_tool
 
 SYSTEM_PROMPT = """
 You are a helpful assistant.
@@ -21,13 +21,24 @@ class ChatAgent:
         self.messenger = Messenger()
         self.messages = [ChatMessage.from_system(SYSTEM_PROMPT)]
 
+        web_search = create_mojeek_search_tool(
+            top_k=5,
+            search_params={"lb": "EN", "lbb": 100, "dlen": 300},
+            # allowed_domains=[".daimlertruck.com"],   # optional, max 25
+            raise_on_failure=False,  # agent gets "No results found." instead of a crash
+        )
+
         chat_generator = OpenAIChatGenerator(
             api_key=Secret.from_env_var("OPENAI_API_KEY"),
             model=os.getenv("AGENT_CHAT_MODEL") or "Qwen/Qwen3.8-27B",
             api_base_url=os.getenv("OPENAI_API_URL"),
             streaming_callback=self._streaming_callback,
         )
-        self.agent = Agent(chat_generator=chat_generator, tools=[mojeek_search])
+        self.agent = Agent(
+            chat_generator=chat_generator,
+            tools=[web_search],
+            max_agent_steps=10,
+        )
         self.agent.warm_up()
 
     async def _streaming_callback(self, chunk: StreamingChunk) -> None:
