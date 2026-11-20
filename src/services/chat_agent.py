@@ -1,5 +1,7 @@
+import asyncio
 import os
 from collections.abc import Awaitable, Callable
+from typing import List
 
 from dotenv import load_dotenv
 from haystack.components.agents import Agent
@@ -27,6 +29,8 @@ class ChatAgent:
         load_dotenv()
         self.messenger = Messenger()
         self.messages = [ChatMessage.from_system(SYSTEM_PROMPT)]
+        self.task: asyncio.Task | None = None
+        self.partial: List[str] = []
 
         web_search = create_mojeek_search_tool(
             top_k=5,
@@ -49,6 +53,8 @@ class ChatAgent:
         self.agent.warm_up()
 
     async def _streaming_callback(self, chunk: StreamingChunk) -> None:
+        if chunk.content:
+            self.partial.append(chunk.content)
         await self.messenger.broadcast("stream_reply", chunk=chunk)
 
     def subscribe(
@@ -59,19 +65,30 @@ class ChatAgent:
     async def ask_async(self, prompt: str) -> None:
         user_msg = ChatMessage.from_user(prompt)
         self.messages.append(user_msg)
+        self.partial.clear()
+        self.task = asyncio.create_task(self.agent.run_async(messages=self.messages))
 
         try:
-            result = await self.agent.run_async(messages=self.messages)
+            if self.task:
+                result = await self.task
 
-            # result["messages"] holds the full turn: user msg, tool calls,
-            # tool results and the final reply. Drop the system message, since
-            # the Agent re-adds system_prompt on every run.
-            self.messages = [
-                m for m in result["messages"] if not m.is_from(ChatRole.SYSTEM)
-            ]
+                # result["messages"] holds the full turn: user msg, tool calls,
+                # tool results and the final reply. Drop the system message, since
+                # the Agent re-adds system_prompt on every run.
+                self.messages = [
+                    m for m in result["messages"] if not m.is_from(ChatRole.SYSTEM)
+                ]
 
-            await self.messenger.broadcast("reply", reply=self.messages[-1])
+                await self.messenger.broadcast("reply", reply=self.messages[-1])
+
+        except asyncio.CancelledError:
+            cancel_message = ChatMessage.from_assistant(text="User interrupted.")
+            await self.messenger.broadcast("reply", reply=cancel_message)
 
         # Keep the REPL alive on API/tool errors
         except Exception:  # noqa: BLE001
             self.messages.pop()
+
+    def stop(self) -> None:
+        if self.task and not self.task.done():
+            self.task.cancel()
