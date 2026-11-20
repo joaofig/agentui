@@ -41,7 +41,7 @@ class MojeekWebSearch:
     Usage:
     ```python
     search = MojeekWebSearch(top_k=5, search_params={"lb": "EN", "lbb": 100})
-    result = search.run(query="Daimler Truck electric trucks")
+    result = search.run(query="What is mojeek?")
     result["documents"], result["links"]
     ```
     """

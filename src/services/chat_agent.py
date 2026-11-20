@@ -11,7 +11,14 @@ from nicemvvm.tools.messenger import Messenger
 from src.services.mojeek_search import create_mojeek_search_tool
 
 SYSTEM_PROMPT = """
-You are a helpful assistant.
+You are a deep research assistant.
+You create comprehensive research reports to answer the user's questions.
+You use the 'web_search' tool to answer any questions about topics you don't know about.
+You perform multiple searches until you have the information you need to answer the question.
+Make sure you research different aspects of the question.
+Use markdown to format your response.
+When you use information from the websearch results, cite your sources using markdown links.
+It is important that you cite accurately.
 """
 
 
@@ -37,7 +44,7 @@ class ChatAgent:
         self.agent = Agent(
             chat_generator=chat_generator,
             tools=[web_search],
-            max_agent_steps=10,
+            # max_agent_steps=10,
         )
         self.agent.warm_up()
 
