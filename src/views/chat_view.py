@@ -14,20 +14,19 @@ class ChatView(View):
         super().__init__(vm)
 
         with ui.column().classes("w-full h-full"):
-            with ui.splitter(horizontal=True, value=70).classes("w-full h-full") as splitter:
+            with ui.splitter(horizontal=True, value=80).classes("w-full h-full") as splitter:
                 with splitter.before, ui.row().classes("w-full h-full"):
                     self.chat_thread = ChatThreadView(vm, "w-full h-full")
 
                 with splitter.after:
                     with ui.row().classes("w-full h-full"):
                         with ui.column().classes("flex-1 h-full"):
-                            ui.textarea("") \
+                            ui.textarea("").classes("w-full h-full") \
                                 .on("keydown.enter", self._send_prompt) \
-                                .classes("w-full h-full pl-4 pr-4") \
-                                .props("clearable autofocus hide-bottom-space dense borderless") \
+                                .props("clearable autofocus") \
                                 .bind_value(vm, "prompt") \
                                 .bind_enabled_from(vm, "enabled")
-
+                    # .props("clearable autofocus hide-bottom-space dense borderless") \
                         with ui.column().classes("flex-none"):
                             ui.button("Submit", on_click=self._send_prompt) \
                                 .classes("m-4")

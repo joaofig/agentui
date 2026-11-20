@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS public.agent_context
     user_id bigint NOT NULL,
     user_name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     context_name TEXT COLLATE pg_catalog."default" NOT NULL,
-    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    created_on timestamp without time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT agent_context_pkey PRIMARY KEY (agent_context_id),
     CONSTRAINT agent_context_user_id_fkey FOREIGN KEY (user_id)
@@ -206,7 +206,7 @@ CREATE TABLE IF NOT EXISTS public.agent_message
     user_name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     role character varying(64) COLLATE pg_catalog."default" NOT NULL,
     content TEXT COLLATE pg_catalog."default" NOT NULL,
-    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    created_on timestamp without time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT agent_message_pkey PRIMARY KEY (agent_message_id),
     CONSTRAINT agent_message_user_id_fkey FOREIGN KEY (user_id)
