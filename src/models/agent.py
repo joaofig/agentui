@@ -5,12 +5,14 @@ from dotenv import load_dotenv
 
 
 class Agent:
-    def __init__(self,
-                 model: str,
-                 callback: Callable[[str], Awaitable[None]],
-                 api_key: str = "",
-                 api_url: str = "",
-                 system_prompt: str = ""):
+    def __init__(
+        self,
+        model: str,
+        callback: Callable[[str], Awaitable[None]],
+        api_key: str = "",
+        api_url: str = "",
+        system_prompt: str = "",
+    ):
         load_dotenv()
         self.model = model
 
@@ -18,12 +20,7 @@ class Agent:
         self.api_url = api_url if len(api_url) else os.getenv("OPENAI_API_URL", "")
         self.callback = callback
         self.system_prompt = system_prompt
-        self.messages = [
-            {
-                "role": "system",
-                "content": self.system_prompt
-            }
-        ]
+        self.messages = [{"role": "system", "content": self.system_prompt}]
 
         if not len(self.api_key):
             raise ValueError("API key is required")
@@ -31,4 +28,4 @@ class Agent:
             raise ValueError("API URL is required")
 
     async def send_prompt(self, prompt: str) -> None:
-        self.messages.append({'role': 'user', 'content': prompt})
+        self.messages.append({"role": "user", "content": prompt})

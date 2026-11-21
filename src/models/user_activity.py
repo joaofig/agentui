@@ -13,4 +13,3 @@ class UserActivityModel:
 
     async def list(self, user_name: str) -> builtins.list[UserActivityDTO]:
         return await self.repo.list(user_name)
-

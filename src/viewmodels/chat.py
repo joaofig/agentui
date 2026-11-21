@@ -10,7 +10,6 @@ from services.chat_agent import ChatAgent
 
 @binding.bindable_dataclass
 class ChatViewModel(ViewModel):
-
     def __init__(self):
         super().__init__()
 

@@ -1,6 +1,7 @@
 from dtos.agent_context import AgentContextDTO
 from repositories.postgres.agent_context import AgentContextRepository
 
+
 class AgentContextModel:
     repo = AgentContextRepository()
 

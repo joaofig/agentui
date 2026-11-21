@@ -34,28 +34,52 @@ class DocumentGrid(View):
                 """,
             },
             {
-                "headerName": "User Name", "field": "user_name", "sortable": True, "align": "left",
-                "filter": "agTextColumnFilter", "floatingFilter": False,
+                "headerName": "User Name",
+                "field": "user_name",
+                "sortable": True,
+                "align": "left",
+                "filter": "agTextColumnFilter",
+                "floatingFilter": False,
             },
             {
-                "headerName": "Role", "field": "user_role", "sortable": True, "align": "left",
-                "filter": "agTextColumnFilter", "floatingFilter": False,
+                "headerName": "Role",
+                "field": "user_role",
+                "sortable": True,
+                "align": "left",
+                "filter": "agTextColumnFilter",
+                "floatingFilter": False,
             },
             {
-                "headerName": "Created At", "field": "created_at", "sortable": True, "align": "left",
-                "filter": "agTextColumnFilter", "floatingFilter": False,
+                "headerName": "Created At",
+                "field": "created_at",
+                "sortable": True,
+                "align": "left",
+                "filter": "agTextColumnFilter",
+                "floatingFilter": False,
             },
             {
-                "headerName": "Created By", "field": "created_by", "sortable": True, "align": "left",
-                "filter": "agTextColumnFilter", "floatingFilter": False,
+                "headerName": "Created By",
+                "field": "created_by",
+                "sortable": True,
+                "align": "left",
+                "filter": "agTextColumnFilter",
+                "floatingFilter": False,
             },
             {
-                "headerName": "Updated At", "field": "updated_at", "sortable": True, "align": "left",
-                "filter": "agTextColumnFilter", "floatingFilter": False,
+                "headerName": "Updated At",
+                "field": "updated_at",
+                "sortable": True,
+                "align": "left",
+                "filter": "agTextColumnFilter",
+                "floatingFilter": False,
             },
             {
-                "headerName": "Updated By", "field": "updated_by", "sortable": True, "align": "left",
-                "filter": "agTextColumnFilter", "floatingFilter": False,
+                "headerName": "Updated By",
+                "field": "updated_by",
+                "sortable": True,
+                "align": "left",
+                "filter": "agTextColumnFilter",
+                "floatingFilter": False,
             },
         ]
         grid_def = {
@@ -80,4 +104,6 @@ class DocumentGrid(View):
     async def _row_selection_changed(self, event):
         row = await self.grid.get_selected_row()
         if row:
-            await self.vm.call("document_selected", user=row, user_id=row["document_id"])
+            await self.vm.call(
+                "document_selected", user=row, user_id=row["document_id"]
+            )

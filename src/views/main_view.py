@@ -20,14 +20,16 @@ class MainView:
                     admin.set_visibility(user_role == "Admin")
 
                 with ui.row().classes("w-full flex-1 justify-end"):
-                    with ui.button(text="Logout", on_click=logout)\
-                            .classes("text-xs mr-4 mt-2") \
-                            .props("padding=xs"):
+                    with (
+                        ui.button(text="Logout", on_click=logout)
+                        .classes("text-xs mr-4 mt-2")
+                        .props("padding=xs")
+                    ):
                         ui.tooltip("Log Out")
 
-            with ui.tab_panels(tabs, value=agent, animated=False) \
-                    .classes("h-full w-full"):
-
+            with ui.tab_panels(tabs, value=agent, animated=False).classes(
+                "h-full w-full"
+            ):
                 with ui.tab_panel(agent).classes("pl-4 pt-0 pb-0 pr-4"):
                     chat_vm = ChatViewModel()
                     ChatPanel(chat_vm)

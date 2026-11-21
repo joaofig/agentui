@@ -37,15 +37,16 @@ class AgentContextViewModel(ViewModel):
         self.agent = Agent(
             chat_generator=self.chat_generator,
             system_prompt=system_prompt,
-            streaming_callback=self._add_content
+            streaming_callback=self._add_content,
         )
 
     def _add_prompt_to_response(self, prompt: str) -> None:
-        self.response += \
-            '<div style="border:1px solid #ccc; padding:4px; border-radius:6px; font-weight: bold;' + \
-            'background-color: antiquewhite">' + \
-            prompt + \
-            "</div><br/>"
+        self.response += (
+            '<div style="border:1px solid #ccc; padding:4px; border-radius:6px; font-weight: bold;'
+            + 'background-color: antiquewhite">'
+            + prompt
+            + "</div><br/>"
+        )
 
     async def _send_prompt(self) -> None:
         self.busy = True

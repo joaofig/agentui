@@ -5,11 +5,11 @@ class AgentContextDTO(BaseDTO):
     """
     Data Transfer Object for Agent Context.
     """
+
     agent_context_id: int = 0
     user_id: int = 0
     user_name: str = ""
     context_name: str = ""
-
 
     def to_dict(self) -> dict:
         """

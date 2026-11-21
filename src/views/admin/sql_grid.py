@@ -17,7 +17,9 @@ class SQLGrid(View):
     async def _update_grid(self):
         if len(self.result) > 0:
             schema = self.vm.get("schema")
-            columns = [{"headerName": column[0], "field": column[0]} for column in schema]
+            columns = [
+                {"headerName": column[0], "field": column[0]} for column in schema
+            ]
             await self.grid.run_grid_method("setGridOption", "columnDefs", columns)
             await self.grid.run_grid_method("setGridOption", "rowData", self.result)
 

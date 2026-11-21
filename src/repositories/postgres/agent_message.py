@@ -6,7 +6,6 @@ from repositories.postgres.base import PostgresRepository
 
 
 class AgentMessageRepository(PostgresRepository):
-
     async def list(self, agent_context_id: int) -> builtins.list[AgentMessageDTO]:
         sql: LiteralString = """
         SELECT  agent_message_id, agent_context_id, user_id, user_name,

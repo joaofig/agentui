@@ -71,9 +71,14 @@ class MojeekWebSearch:
         :param raise_on_failure: If ``False``, API/network errors are logged and an empty result is
             returned instead of raising (handy for agents that should keep going).
         """
-        for name, domains in (("allowed_domains", allowed_domains), ("excluded_domains", excluded_domains)):
+        for name, domains in (
+            ("allowed_domains", allowed_domains),
+            ("excluded_domains", excluded_domains),
+        ):
             if domains and len(domains) > MAX_DOMAIN_FILTERS:
-                raise ValueError(f"Mojeek supports at most {MAX_DOMAIN_FILTERS} {name}, got {len(domains)}.")
+                raise ValueError(
+                    f"Mojeek supports at most {MAX_DOMAIN_FILTERS} {name}, got {len(domains)}."
+                )
 
         self.api_key = api_key
         self.top_k = top_k
@@ -137,19 +142,27 @@ class MojeekWebSearch:
             logger.warning("Mojeek search failed for query %r", query, exc_info=True)
             return {"documents": [], "links": []}
 
-        documents = [self._to_document(r, rank) for rank, r in enumerate(payload.get("results", []), start=1)]
+        documents = [
+            self._to_document(r, rank)
+            for rank, r in enumerate(payload.get("results", []), start=1)
+        ]
         documents = [d for d in documents if d is not None]
         return {"documents": documents, "links": [d.meta["url"] for d in documents]}
 
     # ----------------------------------------------------------------- helpers
     def _build_params(self, query: str, top_k: int | None) -> dict[str, Any]:
-        params: dict[str, Any] = {**self.search_params, "t": max(1, int(top_k or self.top_k))}
+        params: dict[str, Any] = {
+            **self.search_params,
+            "t": max(1, int(top_k or self.top_k)),
+        }
         if self.allowed_domains:
             params["fi"] = ",".join(self.allowed_domains)
         if self.excluded_domains:
             params["fe"] = ",".join(self.excluded_domains)
         # Always enforced, cannot be overridden by search_params.
-        params.update({"q": query, "fmt": "json", "api_key": self.api_key.resolve_value()})
+        params.update(
+            {"q": query, "fmt": "json", "api_key": self.api_key.resolve_value()}
+        )
         return params
 
     def _request(self, params: dict[str, Any]) -> dict[str, Any]:
@@ -162,7 +175,9 @@ class MojeekWebSearch:
             raise MojeekError(f"Mojeek request timed out after {self.timeout}s") from e
         except requests.HTTPError as e:
             # Never leak the api_key that sits in the query string.
-            raise MojeekError(f"Mojeek HTTP {e.response.status_code}: {e.response.text[:200]}") from None
+            raise MojeekError(
+                f"Mojeek HTTP {e.response.status_code}: {e.response.text[:200]}"
+            ) from None
         except (requests.RequestException, ValueError) as e:
             raise MojeekError(f"Mojeek request failed: {type(e).__name__}") from e
 
@@ -180,11 +195,18 @@ class MojeekWebSearch:
         url = result.get("url")
         if not url:
             return None
-        meta: dict[str, Any] = {"url": url, "title": result.get("title", ""), "rank": rank, "source": "mojeek"}
+        meta: dict[str, Any] = {
+            "url": url,
+            "title": result.get("title", ""),
+            "rank": rank,
+            "source": "mojeek",
+        }
         for key in ("date", "cdate", "score", "cfs", "size"):
             if result.get(key) is not None:
                 meta[key] = result[key]
-        return Document(content=result.get("desc") or result.get("title") or "", meta=meta)
+        return Document(
+            content=result.get("desc") or result.get("title") or "", meta=meta
+        )
 
 
 # --------------------------------------------------------------------------- tool

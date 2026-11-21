@@ -89,3 +89,14 @@ class RagDocumentRepository(PostgresRepository):
         return await self.insert_or_update(
             insert, update, document.to_dict(), key_field="rag_doc_id"
         )
+
+    async def delete(self, rag_doc_id: int) -> None:
+        """Delete a document by its primary key.
+
+        Args:
+            rag_doc_id: Primary key of the document to delete.
+        """
+        sql: LiteralString = """
+        DELETE FROM public.rag_document WHERE rag_doc_id = %s
+        """
+        await self.execute_query(sql, (rag_doc_id,))

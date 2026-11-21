@@ -28,7 +28,6 @@ class AgentContextRepository(PostgresRepository):
         result = await self.execute_query(sql, (user_name,))
         return [AgentContextDTO.from_dict(s) for s in result]
 
-
     async def save(self, user: AgentContextDTO) -> dict:
         insert: LiteralString = """
         INSERT INTO agent_context (user_id, user_name, context_name,

@@ -16,7 +16,7 @@ class UserActivityRepository(PostgresRepository):
         WHERE       user_name = %(user_name)s
         ORDER BY    created_at DESC
         """
-        result = await self.execute_query(sql, (user_name, ))
+        result = await self.execute_query(sql, (user_name,))
         return [UserActivityDTO.from_dict(s) for s in result]
 
     async def save(self, user: UserActivityDTO) -> dict:
@@ -33,5 +33,6 @@ class UserActivityRepository(PostgresRepository):
         RETURNING user_activity_id
         """
         update: LiteralString = ""
-        return await self.insert_or_update(insert, update, user.to_dict(),
-                                           key_field="user_activity_id")
+        return await self.insert_or_update(
+            insert, update, user.to_dict(), key_field="user_activity_id"
+        )

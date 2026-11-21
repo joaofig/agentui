@@ -23,7 +23,7 @@ class PyMuPDFParagraphConverter:
                     for *_, text, _, block_type in page.get_text("blocks", sort=True):
                         if block_type != 0:
                             continue
-                        text = re.sub(r"-\n(\w)", r"\1", text)      # dehyphenate
+                        text = re.sub(r"-\n(\w)", r"\1", text)  # dehyphenate
                         text = re.sub(r"\s*\n\s*", " ", text).strip()
                         if len(text) >= self.min_chars:
                             paragraphs.append(text)
@@ -31,7 +31,10 @@ class PyMuPDFParagraphConverter:
                         documents.append(
                             Document(
                                 content="\n\n".join(paragraphs),
-                                meta={"file_path": str(source), "page_number": page.number + 1},
+                                meta={
+                                    "file_path": str(source),
+                                    "page_number": page.number + 1,
+                                },
                             )
                         )
         return {"documents": documents}

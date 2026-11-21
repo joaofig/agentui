@@ -11,9 +11,7 @@ class ChatPanel(View):
 
         with ui.row().classes("w-full h-full"):
             with ui.column().classes("flex-none"):
-                with ui.button("New", icon="add") \
-                        .classes("text-xs") \
-                        .props("no-caps"):
+                with ui.button("New", icon="add").classes("text-xs").props("no-caps"):
                     ui.tooltip("New Session")
 
             with ui.column().classes("h-full flex-1"):

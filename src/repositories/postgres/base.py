@@ -26,23 +26,27 @@ class PostgresRepository:
         self.conn = await PostgresCentral().connect()
         return self.conn
 
-    async def execute_query(self, sql: LiteralString, params: tuple | list | None = None) -> list[tuple[Any, ...]] | \
-                                                                                             list[dict[Any, Any]]:
+    async def execute_query(
+        self, sql: LiteralString, params: tuple | list | None = None
+    ) -> list[tuple[Any, ...]] | list[dict[Any, Any]]:
         await self.connect()
         if self.conn:
             async with self.conn.cursor() as cur:
                 await cur.execute(sql, params)
-                if sql.strip().upper().startswith("SELECT") or "RETURNING" in sql.upper():
+                if (
+                    sql.strip().upper().startswith("SELECT")
+                    or "RETURNING" in sql.upper()
+                ):
                     return await cur.fetchall()
                 await self.conn.commit()
         return []
 
     async def insert_or_update(
-            self,
-            insert: LiteralString,
-            update: LiteralString,
-            value: dict,
-            key_field: str = ""
+        self,
+        insert: LiteralString,
+        update: LiteralString,
+        value: dict,
+        key_field: str = "",
     ) -> dict:
         await self.connect()
         if self.conn:

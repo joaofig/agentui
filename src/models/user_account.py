@@ -19,7 +19,7 @@ class UserAccountModel:
             created_by="",
             created_on=datetime.now(),
             updated_by="",
-            updated_on=datetime.now()
+            updated_on=datetime.now(),
         )
 
     async def save(self, dto: UserAccountDTO):
