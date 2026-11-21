@@ -98,6 +98,30 @@ class RagDocumentRepository(PostgresRepository):
             return updated
         return False
 
+    async def delete(self, rag_doc_id: int, org_id: int) -> bool:
+        """Delete a document by its primary key, scoped to the owning organization.
+
+        Args:
+            rag_doc_id: Primary key of the document to delete.
+            org_id: Organization ID that must match the document's owner.
+
+        Returns:
+            True when a row was deleted, False when no matching document exists.
+        """
+        sql: LiteralString = """
+        DELETE FROM public.rag_document
+        WHERE  rag_doc_id = %s
+            AND org_id = %s
+        """
+        await self.connect()
+        if self.conn:
+            async with self.conn.cursor() as cur:
+                await cur.execute(sql, (rag_doc_id, org_id))
+                deleted = cur.rowcount > 0
+                await self.conn.commit()
+            return deleted
+        return False
+
     async def save(self, document: RagDocumentDTO) -> dict[str, object]:
         """Insert a new document or update an existing one.
 

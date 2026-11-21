@@ -262,6 +262,32 @@ class RagDocumentRepositoryTests(unittest.IsolatedAsyncioTestCase):
 
         self.assertFalse(result)
 
+    async def test_delete_removes_document_and_returns_true(self) -> None:
+        """Delete an existing document and return True."""
+        cursor = FakeCursor()
+        cursor.rowcount = 1
+        repository = self.create_repository(cursor)
+
+        result = await repository.delete(8, org_id=3)
+
+        self.assertTrue(result)
+        query, params = cursor.calls[0]
+        normalized_query = " ".join(query.split())
+        self.assertIn("DELETE FROM public.rag_document", normalized_query)
+        self.assertIn("WHERE rag_doc_id = %s", normalized_query)
+        self.assertIn("AND org_id = %s", normalized_query)
+        self.assertEqual(params, (8, 3))
+
+    async def test_delete_returns_false_when_no_match(self) -> None:
+        """Return False when no document matches the given ID and org."""
+        cursor = FakeCursor()
+        cursor.rowcount = 0
+        repository = self.create_repository(cursor)
+
+        result = await repository.delete(99, org_id=3)
+
+        self.assertFalse(result)
+
 
 if __name__ == "__main__":
     unittest.main()
