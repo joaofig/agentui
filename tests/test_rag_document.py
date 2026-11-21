@@ -17,6 +17,7 @@ class FakeCursor:
         self.inserted_id = inserted_id
         self.calls: list[tuple[str, Any]] = []
         self.fetchone_result: dict[str, int] | None = None
+        self.rowcount = 0
 
     async def __aenter__(self) -> FakeCursor:
         return self
@@ -203,27 +204,63 @@ class RagDocumentRepositoryTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("updated_on", query)
         self.assertNotIn("created_on =", query)
         self.assertNotIn("content =", query)
+        self.assertIn("AND org_id = %(org_id)s", query)
 
     async def test_load_content_returns_bytes_for_existing_document(self) -> None:
         """Load only the binary content for an existing document."""
         cursor = FakeCursor(rows=[{"content": b"secret bytes"}])
         repository = self.create_repository(cursor)
 
-        result = await repository.load_content(8)
+        result = await repository.load_content(8, org_id=3)
 
         self.assertEqual(result, b"secret bytes")
         query, params = cursor.calls[0]
         normalized_query = " ".join(query.split())
         self.assertIn("SELECT content", normalized_query)
         self.assertIn("WHERE rag_doc_id = %s", normalized_query)
-        self.assertEqual(params, (8,))
+        self.assertIn("AND org_id = %s", normalized_query)
+        self.assertEqual(params, (8, 3))
 
     async def test_load_content_returns_none_when_missing(self) -> None:
         """Return None when the requested document does not exist."""
         cursor = FakeCursor()
         repository = self.create_repository(cursor)
 
-        self.assertIsNone(await repository.load_content(99))
+        self.assertIsNone(await repository.load_content(99, org_id=3))
+
+    async def test_load_content_returns_none_when_org_mismatches(self) -> None:
+        """Return None when the document belongs to a different organization."""
+        cursor = FakeCursor()
+        repository = self.create_repository(cursor)
+
+        self.assertIsNone(await repository.load_content(8, org_id=99))
+
+    async def test_save_content_updates_only_content_column(self) -> None:
+        """Update only the content column for an existing document."""
+        cursor = FakeCursor()
+        cursor.rowcount = 1
+        repository = self.create_repository(cursor)
+
+        result = await repository.save_content(8, org_id=3, content=b"new bytes")
+
+        self.assertTrue(result)
+        query, params = cursor.calls[0]
+        normalized_query = " ".join(query.split())
+        self.assertIn("UPDATE public.rag_document", normalized_query)
+        self.assertIn("SET content = %s", normalized_query)
+        self.assertIn("WHERE rag_doc_id = %s", normalized_query)
+        self.assertIn("AND org_id = %s", normalized_query)
+        self.assertEqual(params, (b"new bytes", 8, 3))
+
+    async def test_save_content_returns_false_when_no_match(self) -> None:
+        """Return False when no document matches the given ID and org."""
+        cursor = FakeCursor()
+        cursor.rowcount = 0
+        repository = self.create_repository(cursor)
+
+        result = await repository.save_content(8, org_id=3, content=b"new bytes")
+
+        self.assertFalse(result)
 
 
 if __name__ == "__main__":

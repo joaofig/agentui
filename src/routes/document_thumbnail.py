@@ -18,8 +18,9 @@ from services.document_thumbnail import (
 router = APIRouter()
 
 
-@router.get("/api/rag-documents/{rag_doc_id}/thumbnail")
+@router.get("/api/organizations/{org_id}/rag-documents/{rag_doc_id}/thumbnail")
 async def rag_document_thumbnail(
+    org_id: int,
     rag_doc_id: int,
     format: str = "jpg",
     width: int = 64,
@@ -28,6 +29,7 @@ async def rag_document_thumbnail(
     """Return a JPEG or PNG thumbnail of a document's first page.
 
     Args:
+        org_id: Organization ID that owns the document.
         rag_doc_id: Database ID of the document to render.
         format: Output image format: ``jpg``, ``jpeg``, or ``png``.
         width: Thumbnail width in pixels, from 1 to 1024.
@@ -52,16 +54,21 @@ async def rag_document_thumbnail(
             422, f"Image height must be between 1 and {MAX_THUMBNAIL_DIMENSION} pixels."
         )
 
-    document = await RagDocumentRepository().load(rag_doc_id)
+    repository = RagDocumentRepository()
+    document = await repository.load(rag_doc_id)
     if document is None:
         raise HTTPException(404, "Document not found.")
-    if not document.content:
+    if document.org_id != org_id:
+        raise HTTPException(404, "Document not found.")
+
+    content = await repository.load_content(rag_doc_id, org_id)
+    if not content:
         raise HTTPException(422, "Document has no content to render.")
 
     try:
         image = await asyncio.to_thread(
             render_document_thumbnail,
-            document.content,
+            content,
             document.content_type,
             image_format=normalized_format,
             width=width,

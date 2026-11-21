@@ -50,30 +50,60 @@ class RagDocumentRepository(PostgresRepository):
             )
         return None
 
-    async def load_content(self, rag_doc_id: int) -> bytes | None:
+    async def load_content(self, rag_doc_id: int, org_id: int) -> bytes | None:
         """Load only the binary content for a document, on demand.
 
         Args:
             rag_doc_id: Primary key of the document whose content is requested.
+            org_id: Organization ID that must match the document's owner.
 
         Returns:
-            The document's binary content, or None when no row exists.
+            The document's binary content when the row exists and belongs to
+            the requested organization, or None otherwise.
         """
         sql: LiteralString = """
         SELECT content
         FROM   public.rag_document
         WHERE  rag_doc_id = %s
+            AND org_id = %s
         """
-        result = await self.execute_query(sql, (rag_doc_id,))
+        result = await self.execute_query(sql, (rag_doc_id, org_id))
         if result:
             return cast(dict[str, Any], cast(object, result[0])).get("content")
         return None
+
+    async def save_content(self, rag_doc_id: int, org_id: int, content: bytes) -> bool:
+        """Update only the binary content for an existing document.
+
+        Args:
+            rag_doc_id: Primary key of the document to update.
+            org_id: Organization ID that must match the document's owner.
+            content: The binary content to persist.
+
+        Returns:
+            True when a row was updated, False when no matching document exists.
+        """
+        sql: LiteralString = """
+        UPDATE public.rag_document
+        SET    content = %s
+        WHERE  rag_doc_id = %s
+            AND org_id = %s
+        """
+        await self.connect()
+        if self.conn:
+            async with self.conn.cursor() as cur:
+                await cur.execute(sql, (content, rag_doc_id, org_id))
+                updated = cur.rowcount > 0
+                await self.conn.commit()
+            return updated
+        return False
 
     async def save(self, document: RagDocumentDTO) -> dict[str, object]:
         """Insert a new document or update an existing one.
 
         Args:
-            document: Document DTO to persist.
+            document: Document DTO to persist.  The `content` field is
+                excluded — use `save_content` for on-demand updates.
 
         Returns:
             The DTO's database mapping, including a generated ID after insert.
@@ -102,6 +132,7 @@ class RagDocumentRepository(PostgresRepository):
             updated_on = %(updated_on)s,
             updated_by = %(updated_by)s
         WHERE rag_doc_id = %(rag_doc_id)s
+            AND org_id = %(org_id)s
         RETURNING rag_doc_id
         """
         data = document.to_dict()

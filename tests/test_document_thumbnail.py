@@ -288,16 +288,23 @@ class ThumbnailEndpointTests(unittest.IsolatedAsyncioTestCase):
     async def request_thumbnail(
         self,
         document: RagDocumentDTO | None,
+        org_id: int = 2,
         **params: Any,
     ) -> Any:
         """Call the endpoint with a mocked document repository."""
+        content = document.content if document else None
         repository = type(
-            "FakeRepository", (), {"load": AsyncMock(return_value=document)}
+            "FakeRepository",
+            (),
+            {
+                "load": AsyncMock(return_value=document),
+                "load_content": AsyncMock(return_value=content),
+            },
         )()
         with patch(
             "routes.document_thumbnail.RagDocumentRepository", return_value=repository
         ):
-            return await rag_document_thumbnail(4, **params)
+            return await rag_document_thumbnail(org_id, 4, **params)
 
     async def test_default_response_is_a_64_pixel_jpeg(self) -> None:
         """Return a default 64-by-64 JPEG image."""
@@ -360,6 +367,15 @@ class ThumbnailEndpointTests(unittest.IsolatedAsyncioTestCase):
                 await self.request_thumbnail(document, **params)
             self.assertEqual(error.exception.status_code, 422)
 
+    async def test_wrong_org_id_returns_not_found(self) -> None:
+        """Return HTTP 404 when the document doesn't belong to the requested org."""
+        document = self.create_document(self.create_pdf(), "application/pdf")
+        document.org_id = 99
+        with self.assertRaises(HTTPException) as error:
+            await self.request_thumbnail(document, org_id=2)
+
+        self.assertEqual(error.exception.status_code, 404)
+
     async def test_http_route_parses_query_parameters_and_rejects_bad_values(
         self,
     ) -> None:
@@ -368,7 +384,12 @@ class ThumbnailEndpointTests(unittest.IsolatedAsyncioTestCase):
         application.include_router(router)
         document = self.create_document(self.create_pdf(), "application/pdf")
         repository = type(
-            "FakeRepository", (), {"load": AsyncMock(return_value=document)}
+            "FakeRepository",
+            (),
+            {
+                "load": AsyncMock(return_value=document),
+                "load_content": AsyncMock(return_value=document.content),
+            },
         )()
 
         with patch(
@@ -378,10 +399,10 @@ class ThumbnailEndpointTests(unittest.IsolatedAsyncioTestCase):
                 transport=httpx.ASGITransport(app=application), base_url="http://test"
             ) as client:
                 response = await client.get(
-                    "/api/rag-documents/4/thumbnail?format=png&width=80&height=40"
+                    "/api/organizations/2/rag-documents/4/thumbnail?format=png&width=80&height=40"
                 )
                 invalid_response = await client.get(
-                    "/api/rag-documents/4/thumbnail?width=not-a-number"
+                    "/api/organizations/2/rag-documents/4/thumbnail?width=not-a-number"
                 )
 
         self.assertEqual(response.status_code, 200)
