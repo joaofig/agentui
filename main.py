@@ -4,16 +4,17 @@ from datetime import datetime
 
 from dotenv import load_dotenv
 from nicegui import app, context, ui
+from nicemvvm.tools.user import record_user_activity
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
-from nicemvvm.tools.user import record_user_activity
 from src.dtos.user_account import UserAccountDTO, hash_password
 from src.models.user_account import UserAccountModel
-from src.views.main_view import MainView
+from src.routes.document_thumbnail import router as document_thumbnail_router
 from src.viewmodels.user_account import UserAccountViewModel
 from src.views.admin.dialogs.password_dialog import PasswordDialog
+from src.views.main_view import MainView
 
 # top-level static routes like /favicon.ico must be unrestricted, otherwise the middleware redirects them to /login
 unrestricted_page_routes = {"/favicon.ico", "/login"}
@@ -39,6 +40,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
             record_user_activity()
             return await call_next(request)
         return RedirectResponse(f"/login?redirect_to={path}")
+
+
+app.include_router(document_thumbnail_router)
 
 
 async def change_password(user: UserAccountDTO) -> bool:

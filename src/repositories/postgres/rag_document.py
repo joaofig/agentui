@@ -17,7 +17,7 @@ class RagDocumentRepository(PostgresRepository):
             Document DTOs ordered by creation time, newest first.
         """
         sql: LiteralString = """
-        SELECT      rag_doc_id, org_id, title, file_name, content_type, content,
+        SELECT      rag_doc_id, org_id, title, file_name, content_type,
                     page_count, chunk_count, language, created_on, created_by,
                     updated_on, updated_by
         FROM        public.rag_document
@@ -50,6 +50,25 @@ class RagDocumentRepository(PostgresRepository):
             )
         return None
 
+    async def load_content(self, rag_doc_id: int) -> bytes | None:
+        """Load only the binary content for a document, on demand.
+
+        Args:
+            rag_doc_id: Primary key of the document whose content is requested.
+
+        Returns:
+            The document's binary content, or None when no row exists.
+        """
+        sql: LiteralString = """
+        SELECT content
+        FROM   public.rag_document
+        WHERE  rag_doc_id = %s
+        """
+        result = await self.execute_query(sql, (rag_doc_id,))
+        if result:
+            return cast(dict[str, Any], cast(object, result[0])).get("content")
+        return None
+
     async def save(self, document: RagDocumentDTO) -> dict[str, object]:
         """Insert a new document or update an existing one.
 
@@ -61,11 +80,11 @@ class RagDocumentRepository(PostgresRepository):
         """
         insert: LiteralString = """
         INSERT INTO public.rag_document (
-            org_id, title, file_name, content_type, content, page_count,
+            org_id, title, file_name, content_type, page_count,
             chunk_count, language, created_on, created_by, updated_on, updated_by
         )
         VALUES (
-            %(org_id)s, %(title)s, %(file_name)s, %(content_type)s, %(content)s,
+            %(org_id)s, %(title)s, %(file_name)s, %(content_type)s,
             %(page_count)s, %(chunk_count)s, %(language)s, %(created_on)s,
             %(created_by)s, %(updated_on)s, %(updated_by)s
         )
@@ -77,7 +96,6 @@ class RagDocumentRepository(PostgresRepository):
             title = %(title)s,
             file_name = %(file_name)s,
             content_type = %(content_type)s,
-            content = %(content)s,
             page_count = %(page_count)s,
             chunk_count = %(chunk_count)s,
             language = %(language)s,
@@ -86,6 +104,6 @@ class RagDocumentRepository(PostgresRepository):
         WHERE rag_doc_id = %(rag_doc_id)s
         RETURNING rag_doc_id
         """
-        return await self.insert_or_update(
-            insert, update, document.to_dict(), key_field="rag_doc_id"
-        )
+        data = document.to_dict()
+        data.pop("content", None)
+        return await self.insert_or_update(insert, update, data, key_field="rag_doc_id")
