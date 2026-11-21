@@ -95,9 +95,19 @@ VALUES
 CREATE TABLE IF NOT EXISTS rag_document
 (
     rag_doc_id      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    org_id          bigint NOT NULL,
-    file_name       character varying(256) NOT NULL DEFAULT '',
-    content_type    character varying(64) NOT NULL DEFAULT ''
+    org_id          bigint NOT NULL REFERENCES organization_account(org_id),
+    title           character varying(256) NOT NULL,
+    file_name       text NOT NULL DEFAULT '',
+    content_type    character varying(64) NOT NULL DEFAULT '',
+    content         bytea,
+    page_count      integer,
+    chunk_count     integer,
+    language        character varying(32) NOT NULL DEFAULT 'EN',
+
+    created_on timestamp with time zone NOT NULL DEFAULT now(),
+    created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    updated_on timestamp with time zone NOT NULL DEFAULT now(),
+    updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL
 );
 
 
@@ -177,7 +187,7 @@ CREATE TABLE IF NOT EXISTS public.agent_context
     user_id bigint NOT NULL,
     user_name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     context_name TEXT COLLATE pg_catalog."default" NOT NULL,
-    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    created_on timestamp without time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT agent_context_pkey PRIMARY KEY (agent_context_id),
     CONSTRAINT agent_context_user_id_fkey FOREIGN KEY (user_id)
@@ -206,7 +216,7 @@ CREATE TABLE IF NOT EXISTS public.agent_message
     user_name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     role character varying(64) COLLATE pg_catalog."default" NOT NULL,
     content TEXT COLLATE pg_catalog."default" NOT NULL,
-    created_at timestamp without time zone NOT NULL DEFAULT now(),
+    created_on timestamp without time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT agent_message_pkey PRIMARY KEY (agent_message_id),
     CONSTRAINT agent_message_user_id_fkey FOREIGN KEY (user_id)

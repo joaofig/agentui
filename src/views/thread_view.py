@@ -53,6 +53,10 @@ class ChatThreadView(View):
             ui.markdown("", extras=MD_EXTRAS) \
                 .bind_content_from(self.vm, "stream_text", backward=self._update_scroll) \
                 .bind_visibility_from(self.vm, "stream_visible")
+
+            ui.markdown("", extras=MD_EXTRAS).classes("bg-sky-200") \
+                .bind_content_from(self.vm, "reason_text", backward=self._update_scroll) \
+                .bind_visibility_from(self.vm, "reason_visible")
         self.thread.scroll_to(percent=1.0)
 
     def _update_scroll(self, a: Any) -> Any:

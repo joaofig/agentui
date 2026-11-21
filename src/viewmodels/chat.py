@@ -18,6 +18,8 @@ class ChatViewModel(ViewModel):
         self.prompt: str = ""
         self.stream_text: str = ""
         self.stream_visible: bool = False
+        self.reason_text: str = ""
+        self.reason_visible: bool = False
         self.chat_agent = ChatAgent()
         self.chat_agent.subscribe("stream_reply", self._on_stream_reply)
         self.chat_agent.subscribe("reply", self._on_final_reply)
@@ -44,6 +46,13 @@ class ChatViewModel(ViewModel):
                 self.stream_text += chunk.content
                 self.stream_visible = True
 
+                if chunk.reasoning and chunk.reasoning.reasoning_text:
+                    self.reason_text = chunk.reasoning.reasoning_text
+                    self.reason_visible = True
+                else:
+                    self.reason_text = ""
+                    self.reason_visible = False
+
     async def _on_final_reply(self, **kwargs):
         if "reply" in kwargs:
             reply = cast(ChatMessage, kwargs["reply"])
@@ -54,3 +63,5 @@ class ChatViewModel(ViewModel):
         self.busy = False
         self.stream_text = ""
         self.stream_visible = False
+        self.reason_text = ""
+        self.reason_visible = False
