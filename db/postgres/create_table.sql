@@ -95,9 +95,19 @@ VALUES
 CREATE TABLE IF NOT EXISTS rag_document
 (
     rag_doc_id      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    org_id          bigint NOT NULL,
-    file_name       character varying(256) NOT NULL DEFAULT '',
-    content_type    character varying(64) NOT NULL DEFAULT ''
+    org_id          bigint NOT NULL REFERENCES organization_account(org_id),
+    title           character varying(256) NOT NULL,
+    file_name       text NOT NULL DEFAULT '',
+    content_type    character varying(64) NOT NULL DEFAULT '',
+    content         bytea,
+    page_count      integer,
+    chunk_count     integer,
+    language        character varying(32) NOT NULL DEFAULT 'EN',
+
+    created_on timestamp with time zone NOT NULL DEFAULT now(),
+    created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
+    updated_on timestamp with time zone NOT NULL DEFAULT now(),
+    updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL
 );
 
 
