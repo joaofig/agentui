@@ -52,6 +52,14 @@ class RagDocumentGrid(View):
                 "floatingFilter": False,
             },
             {
+                "headerName": "Description",
+                "field": "description",
+                "sortable": True,
+                "align": "left",
+                "filter": "agTextColumnFilter",
+                "floatingFilter": False,
+            },
+            {
                 "headerName": "File Name",
                 "field": "file_name",
                 "sortable": True,

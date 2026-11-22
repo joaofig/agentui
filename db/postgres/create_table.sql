@@ -92,11 +92,14 @@ VALUES
 --
 -- Table: rag_document
 --
+DROP TABLE IF EXISTS rag_document CASCADE;
+
 CREATE TABLE IF NOT EXISTS rag_document
 (
     rag_doc_id      bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     org_id          bigint NOT NULL REFERENCES organization_account(org_id),
     title           character varying(256) NOT NULL,
+    description     text,
     file_name       text NOT NULL DEFAULT '',
     content_type    character varying(64) NOT NULL DEFAULT '',
     content         bytea,
@@ -170,9 +173,6 @@ CREATE TABLE IF NOT EXISTS user_activity
 )
 
 TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.user_activity
-    OWNER to postgres;
 
 
 --------------------------------------------------

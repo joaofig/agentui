@@ -16,6 +16,7 @@ class RagDocumentViewModel(ViewModel):
     rag_doc_id: int = 0
     org_id: int = 0
     title: str = ""
+    description: str = ""
     file_name: str = ""
     content_type: str = ""
     content: bytes | None = None
@@ -67,6 +68,7 @@ class RagDocumentViewModel(ViewModel):
         self.rag_doc_id = document.rag_doc_id
         self.org_id = document.org_id
         self.title = document.title
+        self.description = document.description
         self.file_name = document.file_name
         self.content_type = document.content_type
         self.content = document.content
@@ -89,6 +91,7 @@ class RagDocumentViewModel(ViewModel):
             rag_doc_id=self.rag_doc_id,
             org_id=self.org_id,
             title=self.title,
+            description=self.description,
             file_name=self.file_name,
             content_type=self.content_type,
             content=self.content,

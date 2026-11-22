@@ -34,6 +34,9 @@ class RagDocumentDialog(View):
             ui.input(label="Title").classes("w-full").props("dense").bind_value(
                 vm, "title"
             )
+            ui.input(label="Description").classes("w-full").props("dense").bind_value(
+                vm, "description"
+            )
             ui.number(label="Organization ID", min=1, precision=0).classes(
                 "w-full"
             ).props("dense").bind_value(vm, "org_id")
@@ -95,6 +98,7 @@ class RagDocumentDialog(View):
         self.document_vm.file_name = event.file.name
         self.document_vm.content_type = content_type
         self.document_vm.content = content
+        self.document_vm.title = Path(event.file.name).stem
         self.file_label.set_text(f"Selected document: {event.file.name}")
 
     async def save(self) -> None:
