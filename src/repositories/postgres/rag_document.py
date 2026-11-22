@@ -17,7 +17,7 @@ class RagDocumentRepository(PostgresRepository):
             Document DTOs ordered by creation time, newest first.
         """
         sql: LiteralString = """
-        SELECT      rag_doc_id, org_id, title, file_name, content_type,
+        SELECT      rag_doc_id, org_id, title, description, file_name, content_type,
                     page_count, chunk_count, language, created_on, created_by,
                     updated_on, updated_by
         FROM        public.rag_document
@@ -37,8 +37,8 @@ class RagDocumentRepository(PostgresRepository):
             The matching document DTO, or None when no row exists.
         """
         sql: LiteralString = """
-        SELECT      rag_doc_id, org_id, title, file_name, content_type, content,
-                    page_count, chunk_count, language, created_on, created_by,
+        SELECT      rag_doc_id, org_id, title, description, file_name, content_type,
+                    content, page_count, chunk_count, language, created_on, created_by,
                     updated_on, updated_by
         FROM        public.rag_document
         WHERE       rag_doc_id = %s
@@ -134,11 +134,11 @@ class RagDocumentRepository(PostgresRepository):
         """
         insert: LiteralString = """
         INSERT INTO public.rag_document (
-            org_id, title, file_name, content_type, page_count,
+            org_id, title, description, file_name, content_type, page_count,
             chunk_count, language, created_on, created_by, updated_on, updated_by
         )
         VALUES (
-            %(org_id)s, %(title)s, %(file_name)s, %(content_type)s,
+            %(org_id)s, %(title)s, %(description)s, %(file_name)s, %(content_type)s,
             %(page_count)s, %(chunk_count)s, %(language)s, %(created_on)s,
             %(created_by)s, %(updated_on)s, %(updated_by)s
         )
@@ -148,6 +148,7 @@ class RagDocumentRepository(PostgresRepository):
         UPDATE public.rag_document SET
             org_id = %(org_id)s,
             title = %(title)s,
+            description = %(description)s,
             file_name = %(file_name)s,
             content_type = %(content_type)s,
             page_count = %(page_count)s,

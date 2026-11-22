@@ -6,7 +6,7 @@ import zipfile
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
-import fitz
+import pymupdf as fitz
 import httpx
 from fastapi import FastAPI, HTTPException
 from openpyxl import Workbook

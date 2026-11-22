@@ -1,9 +1,8 @@
 import re
 from pathlib import Path
 
-import fitz  # PyMuPDF
+import pymupdf as fitz  # PyMuPDF
 from haystack import Document, Pipeline, component
-from haystack.components.preprocessors import DocumentSplitter
 
 
 @component

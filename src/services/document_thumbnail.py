@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-import fitz
+import pymupdf as fitz
 
 MAX_THUMBNAIL_DIMENSION = 1024
 OFFICE_CONVERSION_TIMEOUT_SECONDS = 30
