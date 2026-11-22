@@ -27,7 +27,8 @@ class RagDocumentViewModel(ViewModel):
     updated_on: datetime = datetime.now()
     updated_by: str = ""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
+        """Initialize base view-model behavior after dataclass construction."""
         super().__init__()
 
     async def _on_call(self, msg: str, **kwargs) -> Any:
@@ -42,10 +43,12 @@ class RagDocumentViewModel(ViewModel):
         """
         match msg:
             case "copy":
-                self.copy(kwargs.get("document"))
+                document = kwargs.get("document")
+                if isinstance(document, RagDocumentDTO):
+                    self.copy(document)
 
             case "save":
-                await self.save()
+                return await self.save()
 
             case "load":
                 if "rag_doc_id" in kwargs:
@@ -55,7 +58,7 @@ class RagDocumentViewModel(ViewModel):
                         self.copy(doc)
         return None
 
-    def copy(self, document: RagDocumentDTO):
+    def copy(self, document: RagDocumentDTO) -> None:
         """Copy fields from a DTO into this view model.
 
         Args:
@@ -98,10 +101,24 @@ class RagDocumentViewModel(ViewModel):
             updated_by=get_user_name(),
         )
 
-    async def save(self):
-        """Persist the current document state to the database."""
+    async def save(self) -> bool:
+        """Persist document metadata and content to the database.
+
+        Returns:
+            True when both metadata and any available content were saved.
+        """
         document = self.to_dto()
         repo = RagDocumentRepository()
-        await repo.save(document)
-        if document.rag_doc_id:
-            self.rag_doc_id = document.rag_doc_id
+        saved_document = await repo.save(document)
+        rag_doc_id = saved_document.get("rag_doc_id")
+        if not isinstance(rag_doc_id, int) or rag_doc_id < 1:
+            return False
+
+        self.rag_doc_id = rag_doc_id
+        if self.content is None:
+            return True
+        return await repo.save_content(
+            rag_doc_id=self.rag_doc_id,
+            org_id=self.org_id,
+            content=self.content,
+        )
