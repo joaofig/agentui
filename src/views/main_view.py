@@ -1,4 +1,5 @@
 from nicegui import app, ui
+from nicemvvm.tools.tasks import ManagedTasks
 from nicemvvm.tools.user import logout
 
 from src.viewmodels.chat import ChatViewModel
@@ -45,6 +46,7 @@ class MainView:
                 with ui.tab_panel(documents).classes("pl-4 pt-0 pb-0 pr-4"):
                     rag_doc_list_vm = RagDocumentListViewModel()
                     RagDocumentPanel(rag_doc_list_vm)
+                    ManagedTasks().create(rag_doc_list_vm.call("load"))
 
                 with ui.tab_panel(admin).classes("pl-4 pt-0 pb-0 pr-4"):
                     if user_role == "Admin":

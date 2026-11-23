@@ -24,6 +24,7 @@ dependencies = [
     "nicemvvm@git+https://github.com/joaofig/nicemvvm.git",
     "httpx>=0.28.1",
     "pymupdf>=2.1",
+    "beartype>=0.23.1",
 ]
 
 [tool.ruff]

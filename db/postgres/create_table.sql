@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS rag_doc_chunk
 (
     rag_chunk_id    bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     rag_doc_id      bigint NOT NULL REFERENCES rag_document(rag_doc_id),
-    embedding       vector(1536),
+    embedding       tsvector GENERATED ALWAYS AS (to_tsvector('simple', content)) STORED,
     content         text,
     blob_data       bytea,
     blob_meta       jsonb,
@@ -136,43 +136,10 @@ CREATE TABLE IF NOT EXISTS rag_doc_chunk
     created_by      character varying(64) COLLATE pg_catalog."default" NOT NULL
 );
 
-CREATE OR REPLACE FUNCTION rag_doc_chunk_set_audit_fields()
-RETURNS trigger
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    audit_time text := now()::text;
-BEGIN
-    NEW.meta := COALESCE(NEW.meta, '{}'::jsonb);
 
-    IF TG_OP = 'INSERT' THEN
-        NEW.meta := NEW.meta || jsonb_build_object(
-            'created_on', audit_time,
-            'created_by', current_user,
-            'updated_on', audit_time,
-            'updated_by', current_user
-        );
-    ELSE
-        NEW.meta := NEW.meta || jsonb_build_object(
-            'created_on', COALESCE(OLD.meta -> 'created_on', to_jsonb(audit_time)),
-            'created_by', COALESCE(OLD.meta -> 'created_by', to_jsonb(current_user)),
-            'updated_on', audit_time,
-            'updated_by', current_user
-        );
-    END IF;
-
-    RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS rag_doc_chunk_audit_fields ON rag_doc_chunk;
-CREATE TRIGGER rag_doc_chunk_audit_fields
-    BEFORE INSERT OR UPDATE ON rag_doc_chunk
-    FOR EACH ROW
-    EXECUTE FUNCTION rag_doc_chunk_set_audit_fields();
 
 CREATE INDEX IF NOT EXISTS rag_doc_chunk_rag_doc_id_idx ON rag_doc_chunk (rag_doc_id);
-
+CREATE INDEX IF NOT EXISTS rag_doc_chunk_tsv_idx ON rag_doc_chunk USING gin (embedding);
 
 CREATE TABLE IF NOT EXISTS chat_thread
 (

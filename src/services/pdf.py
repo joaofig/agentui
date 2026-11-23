@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pymupdf as fitz  # PyMuPDF
 from haystack import Document, Pipeline, component
+from pymupdf import pymupdf
 
 
 @component
@@ -46,3 +47,21 @@ class PyMuPDFParagraphConverter:
 #
 # result = pipeline.run({"converter": {"sources": ["document.pdf"]}})
 # paragraphs = [d.content.strip() for d in result["splitter"]["documents"] if d.content.strip()]
+
+
+def clean_block(text: str) -> str:
+    text = re.sub(r"-\n(\w)", r"\1", text)
+    text = re.sub(r"\s*\n\s*", " ", text)
+    return re.sub(r"\s{2,}", " ", text).strip()
+
+
+def extract_paragraphs(doc: pymupdf.Document, min_chars: int = 20) -> list[dict]:
+    paragraphs = []
+    for page in doc:
+        for *_, text, _, block_type in page.get_text("blocks", sort=True):
+            if block_type != 0:
+                continue
+            para = clean_block(text)
+            if len(para) >= min_chars:
+                paragraphs.append({"page": page.number + 1, "text": para})
+    return paragraphs

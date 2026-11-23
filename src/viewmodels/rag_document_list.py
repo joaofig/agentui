@@ -17,7 +17,6 @@ class RagDocumentListViewModel(ViewModel):
         self.selected_id: int = 0
         self.delete_enabled: bool = False
         self.org_id: int = 1
-        self.loaded_org_id: int = 1
         self.documents = GridList()
         self.repo: RagDocumentRepository = RagDocumentRepository()
         self.subscribe(
@@ -30,13 +29,9 @@ class RagDocumentListViewModel(ViewModel):
         Args:
             org_id: Organization filter; defaults to 0.
         """
-        if org_id != self.loaded_org_id:
-            self.selected_id = 0
-            self.delete_enabled = False
         docs = await self.repo.list(org_id=org_id)
         self.documents.replace([doc.to_dict() for doc in docs])
         self.org_id = org_id
-        self.loaded_org_id = org_id
 
     async def _on_call(self, msg: str, **kwargs) -> Any:
         """Handle incoming calls from the view.
