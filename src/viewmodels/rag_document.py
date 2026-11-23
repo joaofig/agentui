@@ -49,7 +49,11 @@ class RagDocumentViewModel(ViewModel):
                     self.copy(document)
 
             case "save":
-                return await self.save()
+                await self.save()
+                document = self.to_dto()
+                if document.content:
+                    # Index this document
+                    pass
 
             case "load":
                 if "rag_doc_id" in kwargs:

@@ -55,7 +55,7 @@ def clean_block(text: str) -> str:
     return re.sub(r"\s{2,}", " ", text).strip()
 
 
-def extract_paragraphs(doc: pymupdf.Document, min_chars: int = 20) -> list[dict]:
+def extract_paragraphs(doc: pymupdf.Document, min_chars: int = 20) -> list[dict[str, int|str]]:
     paragraphs = []
     for page in doc:
         for *_, text, _, block_type in page.get_text("blocks", sort=True):
