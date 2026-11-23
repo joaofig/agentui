@@ -68,6 +68,14 @@ class RagDocumentGrid(View):
                 "floatingFilter": False,
             },
             {
+                "headerName": "Status",
+                "field": "status",
+                "sortable": True,
+                "align": "left",
+                "filter": "agTextColumnFilter",
+                "floatingFilter": False,
+            },
+            {
                 "headerName": "Language",
                 "field": "language",
                 "sortable": True,

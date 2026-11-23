@@ -2,7 +2,7 @@ import os
 from typing import Sequence
 
 from beartype import beartype
-from openai import OpenAI
+from openai import OpenAI, AsyncOpenAI
 
 DEFAULT_EMBED_MODEL = (
     os.getenv("AGENT_EMBED_MODEL")
@@ -20,6 +20,13 @@ def get_openai_client() -> OpenAI:
     api_key = os.getenv("OPENAI_API_KEY", "")
     base_url = os.getenv("OPENAI_API_URL") or None
     return OpenAI(api_key=api_key, base_url=base_url)
+
+
+def get_async_openai_client() -> AsyncOpenAI:
+    """Instantiate OpenAI client using environment variables."""
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    base_url = os.getenv("OPENAI_API_URL") or None
+    return AsyncOpenAI(api_key=api_key, base_url=base_url)
 
 
 @beartype
@@ -60,6 +67,53 @@ def embed_texts(
             # Fallback without explicit dimensions if model doesn't support dimensions param
             print(e)
             response = client.embeddings.create(
+                input=chunk,
+                model=model,
+            )
+        responses.extend(response.data)
+
+    ordered = sorted(responses, key=lambda item: item.index)
+    return [item.embedding for item in ordered]
+
+
+@beartype
+async def embed_texts_async(
+    texts: Sequence[str],
+    model: str = DEFAULT_EMBED_MODEL,
+    dimensions: int = DEFAULT_EMBED_DIM,
+    max_sequence_length: int = 2048,
+) -> list[list[float]]:
+    """Compute embeddings for a sequence of texts.
+
+    Args:
+        texts: List of text strings to embed.
+        model: Embedding model name.
+        dimensions: Target embedding dimension (for models supporting Matryoshka embeddings).
+        max_sequence_length: Maximum sequence length for text inputs.
+
+    Returns:
+        List of embedding vectors.
+    """
+    if not texts:
+        return []
+
+    client = get_async_openai_client()
+    num_chunks = len(texts) // max_sequence_length + 1
+    text_list = list(texts)
+    responses = []
+    for i in range(num_chunks):
+        chunk = text_list[i * max_sequence_length : (i + 1) * max_sequence_length]
+        try:
+            # First attempt with explicit dimensions
+            response = await client.embeddings.create(
+                input=chunk,
+                model=model,
+                dimensions=dimensions,
+            )
+        except Exception as e:  # noqa: BLE001 - fallback for any API error
+            # Fallback without explicit dimensions if model doesn't support dimensions param
+            print(e)
+            response = await client.embeddings.create(
                 input=chunk,
                 model=model,
             )

@@ -1,10 +1,11 @@
 from datetime import datetime
 from typing import Any
 
-from nicegui import binding
+from nicegui import binding, background_tasks, run
 from nicemvvm.tools.user import get_user_name
 from nicemvvm.viewmodels.view_model import ViewModel
 
+from services.rag_service import RagService
 from src.dtos.rag_document import RagDocumentDTO
 from src.repositories.postgres.rag_document import RagDocumentRepository
 
@@ -32,6 +33,11 @@ class RagDocumentViewModel(ViewModel):
         """Initialize base view-model behavior after dataclass construction."""
         super().__init__()
 
+    @classmethod
+    async def _index_document(cls, document: RagDocumentDTO):
+        rag_service = RagService()
+        await rag_service.index_document(document)
+
     async def _on_call(self, msg: str, **kwargs) -> Any:
         """Handle incoming calls from the view.
 
@@ -53,7 +59,8 @@ class RagDocumentViewModel(ViewModel):
                 document = self.to_dto()
                 if document.content:
                     # Index this document
-                    pass
+                    background_tasks.create(self._index_document(document))
+                    # await self._index_document(document)
 
             case "load":
                 if "rag_doc_id" in kwargs:

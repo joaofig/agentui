@@ -39,7 +39,7 @@ class RagDocumentChunkRepository(PostgresRepository):
                     ))
                     res = await cur.fetchone()
                     if res:
-                        rag_chunk_id = res[0]
+                        rag_chunk_id = res["rag_chunk_id"]
                         chunk.rag_chunk_id = rag_chunk_id
                         inserted_ids.append(rag_chunk_id)
 
