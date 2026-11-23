@@ -76,14 +76,6 @@ class RagDocumentGrid(View):
                 "floatingFilter": False,
             },
             {
-                "headerName": "Organization ID",
-                "field": "org_id",
-                "sortable": True,
-                "align": "left",
-                "filter": "agTextColumnFilter",
-                "floatingFilter": False,
-            },
-            {
                 "headerName": "Created On",
                 "field": "created_on",
                 "sortable": True,

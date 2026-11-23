@@ -22,6 +22,20 @@ A web-based AI agent playground built with NiceGUI, Haystack, and OpenAI-compati
 - LibreOffice Writer, Calc, and Impress, for thumbnails of Office and OpenDocument files
 - An OpenAI-compatible API key and endpoint
 
+## RAG document chunks
+
+`db/postgres/create_table.sql` enables pgvector and creates `rag_doc_chunk` using
+the Haystack pgvector column format and 768-dimensional embeddings. Configure
+`PgvectorDocumentStore` with `table_name="rag_doc_chunk"` and
+`embedding_dimension=768`. Each Haystack document must include the numeric
+`rag_doc_id` of an existing `rag_document` in its metadata; the generated
+foreign key cascades chunk deletion when its parent document is deleted.
+
+The audit values `created_on`, `created_by`, `updated_on`, and `updated_by` are
+maintained in the document metadata as JSON-compatible strings. The database
+trigger preserves creation values and refreshes update values when a chunk is
+overwritten.
+
 ## Configuration
 
 Create a `.env` file or provide environment variables before running the app.

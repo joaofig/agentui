@@ -16,8 +16,8 @@ class RagDocumentListViewModel(ViewModel):
         super().__init__()
         self.selected_id: int = 0
         self.delete_enabled: bool = False
-        self.org_id: int = 0
-        self.loaded_org_id: int = 0
+        self.org_id: int = 1
+        self.loaded_org_id: int = 1
         self.documents = GridList()
         self.repo: RagDocumentRepository = RagDocumentRepository()
         self.subscribe(
