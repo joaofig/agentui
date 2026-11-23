@@ -55,5 +55,6 @@ class RagDocumentChunkRepository(PostgresRepository):
                       max(c.page_number for c in rag_doc_chunks),
                       rag_doc_chunks[0].rag_doc_id))
 
+            await conn.commit()
             await conn.close()
         return inserted_ids

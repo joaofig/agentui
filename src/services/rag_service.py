@@ -31,7 +31,8 @@ class RagService:
             for ordinal, (paragraph, embedding)
             in enumerate(zip(paragraphs, embeddings))
         ]
-        await self.repository.insert(chunks)
+        ids = await self.repository.insert(chunks)
+        print(f"Inserted {len(ids)} chunks")
 
     async def index_document(self, document: RagDocumentDTO) -> None:
         match document.content_type:
