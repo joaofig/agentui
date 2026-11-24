@@ -3,13 +3,13 @@ from typing import Any
 from haystack.dataclasses import ImageContent, FileContent, SkillInfo
 from haystack.skill_stores.types import SkillStore
 
-from src.repositories.postgres.skill import SkillRrepository
+from src.repositories.postgres.skill import SkillRepository
 
 
 class PgSkillStore(SkillStore):
 
     def __init__(self, org_id: int = 1):
-        self.repo = SkillRrepository()
+        self.repo = SkillRepository()
 
 
     def list_skills(self) -> dict[str, SkillInfo]:

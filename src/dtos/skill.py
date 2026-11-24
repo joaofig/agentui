@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Self
+from typing import Self, Any
 
 from src.dtos.base import BaseDTO
 

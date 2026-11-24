@@ -133,6 +133,7 @@ CREATE TABLE IF NOT EXISTS rag_doc_chunk
     ordinal         integer NOT NULL,
     content         text NOT NULL DEFAULT '',
     embedding       vector(1536) NOT NULL,
+    tsv             tsvector GENERATED ALWAYS AS (to_tsvector('simple', content)) STORED,
 
     created_on      timestamp with time zone NOT NULL DEFAULT now(),
     created_by      character varying(64) COLLATE pg_catalog."default" NOT NULL
@@ -142,6 +143,7 @@ CREATE TABLE IF NOT EXISTS rag_doc_chunk
 CREATE INDEX IF NOT EXISTS rag_doc_chunk_org_id_idx ON rag_doc_chunk (org_id);
 CREATE INDEX IF NOT EXISTS rag_doc_chunk_rag_doc_id_idx ON rag_doc_chunk (rag_doc_id);
 CREATE INDEX IF NOT EXISTS rag_doc_chunk_tsv_idx ON rag_doc_chunk USING HNSW (embedding vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS rag_doc_chunk_tsv_idx ON rag_doc_chunk USING gin (tsv);
 
 
 
