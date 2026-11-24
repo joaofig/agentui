@@ -247,8 +247,10 @@ CREATE TABLE IF NOT EXISTS public.agent_message
     user_name character varying(64) COLLATE pg_catalog."default" NOT NULL,
     role character varying(64) COLLATE pg_catalog."default" NOT NULL,
     content TEXT COLLATE pg_catalog."default" NOT NULL,
+
     created_on timestamp without time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
+
     CONSTRAINT agent_message_pkey PRIMARY KEY (agent_message_id),
     CONSTRAINT agent_message_user_id_fkey FOREIGN KEY (user_id)
         REFERENCES public.user_account (user_id) MATCH SIMPLE
@@ -264,3 +266,46 @@ TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.agent_message
     OWNER to postgres;
+
+
+--------------------------------------------------
+--
+-- Table: skill
+--
+DROP TABLE IF EXISTS skill CASCADE;
+
+CREATE TABLE skill (
+    skill_id        bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    org_id          bigint NOT NULL REFERENCES organization_account(org_id),
+    name            text NOT NULL,
+    description     text NOT NULL,    -- tier 1
+    instructions    text NOT NULL,   -- tier 2 (SKILL.md body)
+    enabled         bool DEFAULT true,
+    version         int DEFAULT 1,
+
+    created_on      timestamp with time zone NOT NULL DEFAULT now(),
+    created_by      character varying(64) COLLATE pg_catalog."default" NOT NULL default 'admin',
+    updated_on      timestamp with time zone NOT NULL DEFAULT now(),
+    updated_by      character varying(64) COLLATE pg_catalog."default" NOT NULL default 'admin'
+);
+
+CREATE INDEX IF NOT EXISTS skill_org_name_idx ON skill (org_id, name);
+
+
+DROP TABLE IF EXISTS skill_file CASCADE;
+
+CREATE TABLE skill_file (
+    skill_file_id   bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    skill_id        bigint NOT NULL REFERENCES skill(skill_id) ON DELETE CASCADE,
+    path            character varying(256) NOT NULL,
+    content         bytea NOT NULL,
+    mime            text NOT NULL,
+
+    created_on      timestamp with time zone NOT NULL DEFAULT now(),
+    created_by      character varying(64) COLLATE pg_catalog."default" NOT NULL default 'admin',
+    updated_on      timestamp with time zone NOT NULL DEFAULT now(),
+    updated_by      character varying(64) COLLATE pg_catalog."default" NOT NULL default 'admin'
+);
+
+
+CREATE INDEX IF NOT EXISTS skill_file_skill_idx ON skill_file (skill_id, path);

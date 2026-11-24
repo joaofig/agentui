@@ -1,5 +1,7 @@
 import pymupdf
 
+from loguru import logger
+
 from src.repositories.postgres.rag_doc_chunk import RagDocumentChunkRepository
 from src.dtos.rag_doc_chunk import RagDocumentChunkDTO
 from src.services.embeddings import embed_texts_async
@@ -32,7 +34,7 @@ class RagService:
             in enumerate(zip(paragraphs, embeddings))
         ]
         ids = await self.repository.insert(chunks)
-        print(f"Inserted {len(ids)} chunks")
+        logger.info(f"Inserted {len(ids)} chunks")
 
     async def index_document(self, document: RagDocumentDTO) -> None:
         match document.content_type:

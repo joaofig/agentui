@@ -1,4 +1,5 @@
 import hashlib
+from dataclasses import dataclass
 from typing import Self
 
 from nicemvvm.tools.user import dict_to_datetime
@@ -12,6 +13,7 @@ def hash_password(password: str) -> str:
 USER_ROLES = ["Admin", "User"]
 
 
+@dataclass
 class UserAccountDTO(BaseDTO):
     user_id: int
     user_name: str
