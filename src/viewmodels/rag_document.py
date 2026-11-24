@@ -33,10 +33,10 @@ class RagDocumentViewModel(ViewModel):
         """Initialize base view-model behavior after dataclass construction."""
         super().__init__()
 
-    @classmethod
-    async def _index_document(cls, document: RagDocumentDTO):
+    async def _index_document(self, document: RagDocumentDTO):
         rag_service = RagService()
         await rag_service.index_document(document)
+        await self.broadcast("rag_document_list", "load")
 
     async def _on_call(self, msg: str, **kwargs) -> Any:
         """Handle incoming calls from the view.
@@ -124,11 +124,12 @@ class RagDocumentViewModel(ViewModel):
         document = self.to_dto()
         repo = RagDocumentRepository()
         saved_document = await repo.save(document)
-        rag_doc_id = saved_document.get("rag_doc_id")
+        rag_doc_id = saved_document.get("rag_doc_id", 0)
         if not isinstance(rag_doc_id, int) or rag_doc_id < 1:
             return False
 
         self.rag_doc_id = rag_doc_id
+        print(self.rag_doc_id)
         if self.content is None:
             return True
         return await repo.save_content(

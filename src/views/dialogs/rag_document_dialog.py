@@ -140,9 +140,6 @@ class RagDocumentDialog(View):
         except Exception as ex:
             ui.notify(f"The document could not be saved: {ex}", type="negative")
             return
-        # if not saved:
-        #     ui.notify("The document content could not be saved.", type="negative")
-        #     return
         self.dialog.submit("save")
 
     async def show(self) -> str | None:

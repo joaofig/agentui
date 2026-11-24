@@ -106,7 +106,7 @@ CREATE TABLE IF NOT EXISTS rag_document
     page_count      integer,
     chunk_count     integer,
     language        character varying(32) NOT NULL DEFAULT 'EN',
-    status          character varying(32) NOT NULL DEFAULT 'pending',
+    status          character varying(32) NOT NULL DEFAULT '⏳',
 
     created_on timestamp with time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,

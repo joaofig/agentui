@@ -15,7 +15,7 @@ class RagDocumentDTO(BaseDTO):
     description: str = ""
     file_name: str = ""
     content_type: str = ""
-    status: str = "pending"
+    status: str = "⏳"
     content: bytes | None = None
     page_count: int | None = None
     chunk_count: int | None = None
@@ -43,7 +43,7 @@ class RagDocumentDTO(BaseDTO):
             file_name=data.get("file_name", ""),
             content_type=data.get("content_type", ""),
             content=data.get("content"),
-            status=data.get("status", "pending"),
+            status=data.get("status", "⏳"),
             page_count=data.get("page_count"),
             chunk_count=data.get("chunk_count"),
             language=data.get("language", "EN"),

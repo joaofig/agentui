@@ -46,7 +46,7 @@ class RagDocumentChunkRepository(PostgresRepository):
             async with conn.cursor() as cur:
                 sql = """
                     UPDATE  rag_document 
-                    SET     status = 'processed',
+                    SET     status = '✅',
                             chunk_count = %s,
                             page_count = %s
                     WHERE   rag_doc_id = %s
