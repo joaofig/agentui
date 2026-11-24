@@ -20,19 +20,8 @@ class RagDocumentPanel(View):
 
         with ui.row().classes("w-full h-full"):
             with ui.column().classes("h-full flex-none"):
-                ui.number(label="Organization ID", min=1, precision=0).classes(
-                    "w-36"
-                ).props("dense").bind_value(vm, "org_id")
-
                 with (
-                    ui.button("Load", icon="refresh", on_click=self._on_load_documents)
-                    .classes("text-xs")
-                    .props("padding=xs no-caps")
-                ):
-                    ui.tooltip("Load Documents")
-
-                with (
-                    ui.button(icon="add", on_click=self._show_dialog)
+                    ui.button(icon="add", on_click=self._add_document)
                     .classes("text-xs")
                     .props("padding=xs")
                 ):
@@ -53,6 +42,15 @@ class RagDocumentPanel(View):
                 ):
                     ui.tooltip("Export to Excel")
 
+
+                with (
+                    ui.button(icon="refresh", on_click=self._on_load_documents)
+                    .classes("text-xs")
+                    .props("padding=xs")
+                ):
+                    ui.tooltip("Refresh")
+
+
             with ui.column().classes("h-full flex-1"):
                 self.grid = RagDocumentGrid(vm)
 
@@ -69,7 +67,7 @@ class RagDocumentPanel(View):
             dialog.close()
             await self.vm.call("delete", rag_doc_id=rag_doc_id, org_id=org_id)
 
-    async def _show_dialog(self):
+    async def _add_document(self):
         vm = RagDocumentViewModel()
         vm.org_id = self.vm.get("org_id", 0)
         vm.created_by = app.storage.user.get("username", "Unknown")
@@ -82,9 +80,9 @@ class RagDocumentPanel(View):
 
     async def _on_load_documents(self) -> None:
         try:
-            org_id = float(self.vm.get("org_id", 0))
+            org_id = int(self.vm.get("org_id", 1))
         except TypeError, ValueError, OverflowError:
-            org_id = 0.0
+            org_id = 1
         if not org_id.is_integer() or org_id < 1:
             ui.notify("A valid organization ID is required.", type="negative")
             return

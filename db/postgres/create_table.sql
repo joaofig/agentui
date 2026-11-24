@@ -106,12 +106,43 @@ CREATE TABLE IF NOT EXISTS rag_document
     page_count      integer,
     chunk_count     integer,
     language        character varying(32) NOT NULL DEFAULT 'EN',
+    status          character varying(32) NOT NULL DEFAULT '⏳',
 
     created_on timestamp with time zone NOT NULL DEFAULT now(),
     created_by character varying(64) COLLATE pg_catalog."default" NOT NULL,
     updated_on timestamp with time zone NOT NULL DEFAULT now(),
     updated_by character varying(64) COLLATE pg_catalog."default" NOT NULL
 );
+
+
+
+
+CREATE EXTENSION IF NOT EXISTS vector;
+
+
+-- Table: rag_doc_chunk
+--
+DROP TABLE IF EXISTS rag_doc_chunk;
+
+CREATE TABLE IF NOT EXISTS rag_doc_chunk
+(
+    rag_chunk_id    bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    rag_doc_id      bigint NOT NULL REFERENCES rag_document(rag_doc_id),
+    org_id          bigint NOT NULL REFERENCES organization_account(org_id),
+    page_number     integer NOT NULL,
+    ordinal         integer NOT NULL,
+    content         text NOT NULL DEFAULT '',
+    embedding       vector(1536) NOT NULL,
+
+    created_on      timestamp with time zone NOT NULL DEFAULT now(),
+    created_by      character varying(64) COLLATE pg_catalog."default" NOT NULL
+);
+
+
+CREATE INDEX IF NOT EXISTS rag_doc_chunk_org_id_idx ON rag_doc_chunk (org_id);
+CREATE INDEX IF NOT EXISTS rag_doc_chunk_rag_doc_id_idx ON rag_doc_chunk (rag_doc_id);
+CREATE INDEX IF NOT EXISTS rag_doc_chunk_tsv_idx ON rag_doc_chunk USING HNSW (embedding vector_cosine_ops);
+
 
 
 

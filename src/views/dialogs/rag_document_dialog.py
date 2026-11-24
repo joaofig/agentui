@@ -1,10 +1,10 @@
 from pathlib import Path
 
 from nicegui import events, ui
+from nicemvvm.viewmodels.view_model import ViewModel
 from nicemvvm.views.view import View
 
 from src.services.document_thumbnail import OFFICE_EXTENSIONS
-from src.viewmodels.rag_document import RagDocumentViewModel
 
 DOCUMENT_CONTENT_TYPES = {
     ".pdf": "application/pdf",
@@ -18,14 +18,13 @@ SUPPORTED_FILE_EXTENSIONS = tuple(sorted(DOCUMENT_CONTENT_TYPES))
 class RagDocumentDialog(View):
     """Dialog for creating or editing a RAG document."""
 
-    def __init__(self, vm: RagDocumentViewModel) -> None:
+    def __init__(self, vm: ViewModel) -> None:
         """Build the document editor and connect it to the supplied view model.
 
         Args:
             vm: Document view model that backs the dialog fields.
         """
         super().__init__(vm)
-        self.document_vm = vm
 
         with ui.dialog() as dialog, ui.card().classes("w-120"):
             with ui.row().classes("w-full bg-gray-200 p-2"):
@@ -37,16 +36,14 @@ class RagDocumentDialog(View):
             ui.input(label="Description").classes("w-full").props("dense").bind_value(
                 vm, "description"
             )
-            ui.number(label="Organization ID", min=1, precision=0).classes(
-                "w-full"
-            ).props("dense").bind_value(vm, "org_id")
             ui.input(label="Language").classes("w-full").props("dense").bind_value(
                 vm, "language"
             )
 
+            file_name = self.vm.get("file_name", "")
             self.file_label = ui.label(
-                f"Selected document: {self.document_vm.file_name}"
-                if self.document_vm.file_name
+                f"Selected document: {file_name}"
+                if file_name
                 else "No document selected"
             ).classes("text-sm")
             ui.upload(
@@ -95,18 +92,19 @@ class RagDocumentDialog(View):
             ui.notify("The uploaded document is empty.", type="negative")
             return
 
-        self.document_vm.file_name = event.file.name
-        self.document_vm.content_type = content_type
-        self.document_vm.content = content
-        self.document_vm.title = Path(event.file.name).stem
+        self.vm.set("file_name", event.file.name)
+        self.vm.set("content", content)
+        self.vm.set("content_type", content_type)
+        self.vm.set("title", Path(event.file.name).stem)
+
         self.file_label.set_text(f"Selected document: {event.file.name}")
 
     async def save(self) -> None:
         """Validate the exposed fields and persist the document before closing."""
-        title = (self.document_vm.title or "").strip()
-        language = (self.document_vm.language or "").strip()
+        title = self.vm.get("title", "").strip()
+        language = self.vm.get("language", "").strip()
         try:
-            org_id = float(self.document_vm.org_id)
+            org_id = float(self.vm.get("org_id", 0.0))
         except TypeError, ValueError, OverflowError:
             org_id = 0.0
 
@@ -119,12 +117,14 @@ class RagDocumentDialog(View):
         if not language:
             ui.notify("Language is required.", type="negative")
             return
+
+        file_name = self. vm.get("file_name", "")
         if (
-            not self.document_vm.file_name
-            or self._content_type_for_filename(self.document_vm.file_name) is None
-            or self.document_vm.content_type
+            not file_name
+            or self._content_type_for_filename(file_name) is None
+            or self.vm.get("content_type", "")
             not in {*DOCUMENT_CONTENT_TYPES.values(), "application/x-pdf"}
-            or not self.document_vm.content
+            or not self.vm.get("content")
         ):
             ui.notify(
                 "Upload a supported, non-empty document before saving.",
@@ -132,16 +132,13 @@ class RagDocumentDialog(View):
             )
             return
 
-        self.document_vm.title = title
-        self.document_vm.language = language
-        self.document_vm.org_id = int(org_id)
+        self.vm.set("title", title)
+        self.vm.set("language", language)
+        self.vm.set("org_id", int(org_id))
         try:
-            saved = await self.document_vm.call("save")
-        except Exception:
-            ui.notify("The document could not be saved.", type="negative")
-            return
-        if not saved:
-            ui.notify("The document content could not be saved.", type="negative")
+            await self.vm.call("save")
+        except Exception as ex:
+            ui.notify(f"The document could not be saved: {ex}", type="negative")
             return
         self.dialog.submit("save")
 

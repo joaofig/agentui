@@ -18,7 +18,7 @@ class RagDocumentRepository(PostgresRepository):
         """
         sql: LiteralString = """
         SELECT      rag_doc_id, org_id, title, description, file_name, content_type,
-                    page_count, chunk_count, language, created_on, created_by,
+                    page_count, chunk_count, status, language, created_on, created_by,
                     updated_on, updated_by
         FROM        public.rag_document
         WHERE       org_id = %s
