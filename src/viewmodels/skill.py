@@ -20,9 +20,9 @@ class SkillViewModel(ViewModel):
     instructions: str = ""
     enabled: bool = False
     version: int = 0
-    created_on: datetime = datetime.now()
+    created_on: datetime = datetime.now().astimezone()
     created_by: str = ""
-    updated_on: datetime = datetime.now()
+    updated_on: datetime = datetime.now().astimezone()
     updated_by: str = ""
 
     def __post_init__(self) -> None:
@@ -30,11 +30,11 @@ class SkillViewModel(ViewModel):
         super().__init__()
 
     async def _on_call(self, msg: str, **kwargs: Any) -> Any:
-        """Handle actions requested by the skill view.
+        """Handle incoming view actions.
 
         Args:
             msg: Action message (copy, save, or load).
-            **kwargs: Action data such as a skill DTO, organization ID, or name.
+            **kwargs: Action data such as a skill DTO, name, or org_id.
 
         Returns:
             None.
@@ -49,14 +49,17 @@ class SkillViewModel(ViewModel):
                 await self.save()
 
             case "load":
-                await self.load(
-                    org_id=kwargs.get("org_id"),
-                    name=kwargs.get("name"),
-                )
+                if "name" in kwargs:
+                    org_id = int(kwargs.get("org_id", self.org_id))
+                    skill = await SkillRepository().load(
+                        org_id=org_id, name=kwargs["name"]
+                    )
+                    if skill:
+                        self.copy(skill)
         return None
 
     def copy(self, skill: SkillDTO) -> None:
-        """Copy the fields of a skill DTO into this view model.
+        """Copy fields from a skill DTO into this view model.
 
         Args:
             skill: Source skill DTO.
@@ -74,13 +77,13 @@ class SkillViewModel(ViewModel):
         self.updated_by = skill.updated_by
 
     def to_dto(self) -> SkillDTO:
-        """Create a skill DTO from the current view-model state.
+        """Build a skill DTO from the current view-model state.
 
         Returns:
-            A skill DTO populated with the current values and audit fields.
+            A skill DTO populated with the current fields and audit metadata.
         """
         is_old = self.skill_id > 0
-        return SkillDTO.model_construct(
+        return SkillDTO(
             skill_id=self.skill_id,
             org_id=self.org_id,
             name=self.name,
@@ -88,7 +91,7 @@ class SkillViewModel(ViewModel):
             instructions=self.instructions,
             enabled=self.enabled,
             version=self.version,
-            created_on=(self.created_on if is_old else datetime.now().astimezone()),
+            created_on=self.created_on if is_old else datetime.now().astimezone(),
             created_by=self.created_by if is_old else get_user_name(),
             updated_on=datetime.now().astimezone(),
             updated_by=get_user_name(),

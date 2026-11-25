@@ -1,12 +1,11 @@
-from typing import cast, Any
+from typing import Any, cast
 
 from haystack.dataclasses import ChatMessage, ChatRole
 from nicegui import ui
-from nicegui.events import ScrollEventArguments, ObservableChangeEventArguments
+from nicegui.events import ObservableChangeEventArguments, ScrollEventArguments
 from nicegui.observables import ObservableList
 from nicemvvm.viewmodels.view_model import ViewModel
 from nicemvvm.views.view import View
-
 
 MD_EXTRAS = [
     "markdown-in-html",

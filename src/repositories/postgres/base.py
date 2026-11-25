@@ -1,9 +1,9 @@
-from typing import LiteralString, Any
+from typing import Any, LiteralString
 
+from nicemvvm.tools.singleton import singleton
 from psycopg import AsyncConnection, rows
 
 from src.repositories.postgres.client import get_postgres_client
-from nicemvvm.tools.singleton import singleton
 
 
 @singleton
@@ -54,11 +54,8 @@ class PostgresRepository:
                 row_id = key_field
             else:
                 row_id_fields = [k for k in value if k == "id" or k.endswith("_id")]
-                if not row_id_fields:
-                    # Fallback if no obvious ID field
-                    row_id = "id"
-                else:
-                    row_id = row_id_fields[0]
+                # Fallback if no obvious ID field.
+                row_id = row_id_fields[0] if row_id_fields else "id"
 
             async with self.conn.cursor() as cur:
                 if value.get(row_id, 0) > 0:

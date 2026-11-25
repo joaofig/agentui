@@ -118,7 +118,7 @@ class RagDocumentDialog(View):
             ui.notify("Language is required.", type="negative")
             return
 
-        file_name = self. vm.get("file_name", "")
+        file_name = self.vm.get("file_name", "")
         if (
             not file_name
             or self._content_type_for_filename(file_name) is None

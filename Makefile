@@ -4,6 +4,10 @@ test:
 check:
 	ruff check .
 
+format:
+	uv run ruff format .
+	uv run ruff check . --fix
+
 podman-run:
 	podman run \
 		--name ai-agent \

@@ -1,11 +1,9 @@
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Self
 
 from src.dtos.base import BaseDTO
 
 
-@dataclass
 class SkillDTO(BaseDTO):
     skill_id: int
     org_id: int

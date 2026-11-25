@@ -9,10 +9,10 @@ from src.repositories.postgres.skill import SkillRepository
 
 @binding.bindable_dataclass
 class SkillListViewModel(ViewModel):
-    """View model for listing and managing skills."""
+    """View model for listing skills belonging to an organization."""
 
     def __init__(self) -> None:
-        """Initialize the skill list, repository, and load subscription."""
+        """Initialize the skill list, repository, and reload subscription."""
         super().__init__()
         self.selected_id: int = 0
         self.delete_enabled: bool = False
@@ -55,19 +55,19 @@ class SkillListViewModel(ViewModel):
 
             case "delete":
                 skill_id = int(kwargs.get("skill_id", self.selected_id) or 0)
-                org_id = int(kwargs.get("org_id", self.org_id) or 0)
+                org_id = int(kwargs.get("org_id", self.org_id))
                 if skill_id > 0 and org_id > 0:
-                    await self.repository.delete(skill_id=skill_id, org_id=org_id)
+                    await self.repo.delete(skill_id=skill_id, org_id=org_id)
                     await self.load(org_id=org_id)
                     self.selected_id = 0
                     self.delete_enabled = False
         return None
 
     async def _on_load(self, **kwargs: Any) -> None:
-        """Reload skills after a load notification.
+        """Reload skills after a list-load notification.
 
         Args:
-            **kwargs: Optional organization ID filter.
+            **kwargs: Optional org_id used to filter the skill table.
         """
-        org_id = kwargs.get("org_id", self.org_id)
-        await self.load(org_id=int(org_id))
+        org_id = int(kwargs.get("org_id", self.org_id))
+        await self.load(org_id=org_id)

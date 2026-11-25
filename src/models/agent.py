@@ -1,5 +1,5 @@
 import os
-from typing import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 
 from dotenv import load_dotenv
 

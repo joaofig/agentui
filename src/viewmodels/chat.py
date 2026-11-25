@@ -1,6 +1,6 @@
 from typing import Any, cast
 
-from haystack.dataclasses import StreamingChunk, ChatMessage, ChatRole
+from haystack.dataclasses import ChatMessage, StreamingChunk
 from nicegui import binding
 from nicemvvm.tools.observability import GridList
 from nicemvvm.viewmodels.view_model import ViewModel

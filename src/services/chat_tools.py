@@ -1,7 +1,6 @@
-from typing import Annotated
+from datetime import UTC, datetime
 
 from haystack.tools import tool
-from datetime import UTC, datetime
 
 # ---------------------------------------------------------------------------
 # Tools — plain functions; type hints + Annotated docs become the JSON schema

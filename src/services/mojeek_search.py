@@ -2,8 +2,10 @@
 Mojeek web search for Haystack Agents.
 
 Provides:
-  * ``MojeekWebSearch``   – a Haystack component (usable in pipelines or wrapped as a tool)
-  * ``create_mojeek_search_tool`` – returns a ``ComponentTool`` ready to inject into ``Agent(tools=[...])``
+  * ``MojeekWebSearch``   – a Haystack component (usable in pipelines or wrapped
+    as a tool)
+  * ``create_mojeek_search_tool`` – returns a ``ComponentTool`` ready to inject
+    into ``Agent(tools=[...])``
 
 API reference: https://www.mojeek.com/support/api/search/request_parameters.html
 """
@@ -18,7 +20,8 @@ from haystack import Document, component
 from haystack.tools import ComponentTool
 from haystack.utils import Secret, deserialize_secrets_inplace
 
-try:  # Haystack 2.x / 3.x both expose these at top level; keep a fallback path just in case.
+# Haystack 2.x / 3.x expose these at top level; keep a fallback for older layouts.
+try:
     from haystack import default_from_dict, default_to_dict
 except ImportError:  # pragma: no cover
     from haystack.core.serialization import default_from_dict, default_to_dict
@@ -27,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 MOJEEK_API_URL = "https://api.mojeek.com/search"
 MAX_DOMAIN_FILTERS = 25  # Mojeek limit for `fi` / `fe`
+_DEFAULT_API_KEY = Secret.from_env_var("MOJEEK_API_KEY")
 
 
 class MojeekError(RuntimeError):
@@ -36,7 +40,8 @@ class MojeekError(RuntimeError):
 @component
 class MojeekWebSearch:
     """
-    Searches the web with the Mojeek Search API and returns results as Haystack Documents.
+    Searches the web with the Mojeek Search API and returns results as Haystack
+    Documents.
 
     Usage:
     ```python
@@ -48,7 +53,7 @@ class MojeekWebSearch:
 
     def __init__(
         self,
-        api_key: Secret = Secret.from_env_var("MOJEEK_API_KEY"),
+        api_key: Secret = _DEFAULT_API_KEY,
         top_k: int = 10,
         allowed_domains: list[str] | None = None,
         excluded_domains: list[str] | None = None,
@@ -59,17 +64,21 @@ class MojeekWebSearch:
         raise_on_failure: bool = True,
     ) -> None:
         """
-        :param api_key: Mojeek API key. Defaults to the ``MOJEEK_API_KEY`` environment variable.
+        :param api_key: Mojeek API key. Defaults to the ``MOJEEK_API_KEY``
+            environment variable.
         :param top_k: Default number of results to return (Mojeek ``t``).
-        :param allowed_domains: Restrict results to these domains (Mojeek ``fi``, max 25).
+        :param allowed_domains: Restrict results to these domains (Mojeek ``fi``,
+            max 25).
             Prefix a domain with ``.`` to include its subdomains.
         :param excluded_domains: Exclude these domains (Mojeek ``fe``, max 25).
-        :param search_params: Extra Mojeek request parameters, e.g. ``{"lb": "EN", "lbb": 100,
-            "rb": "PT", "rbb": 10, "safe": 1, "since": "month", "dlen": 300}``.
+        :param search_params: Extra Mojeek request parameters, e.g.
+            ``{"lb": "EN", "lbb": 100, "rb": "PT", "rbb": 10, "safe": 1,
+            "since": "month", "dlen": 300}``.
         :param api_url: Mojeek search endpoint.
         :param timeout: HTTP timeout in seconds.
-        :param raise_on_failure: If ``False``, API/network errors are logged and an empty result is
-            returned instead of raising (handy for agents that should keep going).
+        :param raise_on_failure: If ``False``, API/network errors are logged and
+            an empty result is returned instead of raising (handy for agents that
+            should keep going).
         """
         for name, domains in (
             ("allowed_domains", allowed_domains),
@@ -77,7 +86,8 @@ class MojeekWebSearch:
         ):
             if domains and len(domains) > MAX_DOMAIN_FILTERS:
                 raise ValueError(
-                    f"Mojeek supports at most {MAX_DOMAIN_FILTERS} {name}, got {len(domains)}."
+                    f"Mojeek supports at most {MAX_DOMAIN_FILTERS} {name}, "
+                    f"got {len(domains)}."
                 )
 
         self.api_key = api_key
@@ -111,7 +121,7 @@ class MojeekWebSearch:
         )
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "MojeekWebSearch":
+    def from_dict(cls, data: dict[str, Any]) -> MojeekWebSearch:
         data = {**data, "init_parameters": dict(data.get("init_parameters", {}))}
         deserialize_secrets_inplace(data["init_parameters"], keys=["api_key"])
         return default_from_dict(cls, data)
@@ -122,10 +132,12 @@ class MojeekWebSearch:
         """
         Search the web with Mojeek.
 
-        :param query: The web search query. Use concise keywords; search operators such as
-            `site:example.com` are supported.
-        :param top_k: Optional number of results to return (1-20). Defaults to the configured value.
-        :returns: A dict with `documents` (one per result, snippet as content) and `links` (result URLs).
+        :param query: The web search query. Use concise keywords; search operators
+            such as `site:example.com` are supported.
+        :param top_k: Optional number of results to return (1-20). Defaults to the
+            configured value.
+        :returns: A dict with `documents` (one per result, snippet as content) and
+            `links` (result URLs).
         """
         print(query)
         if not query or not query.strip():
@@ -217,7 +229,10 @@ def format_results_for_llm(documents: list[Document]) -> str:
     blocks = []
     for doc in documents:
         m = doc.meta
-        line = f"[{m.get('rank', '?')}] {m.get('title') or '(untitled)'}\nURL: {m.get('url')}"
+        line = (
+            f"[{m.get('rank', '?')}] {m.get('title') or '(untitled)'}\n"
+            f"URL: {m.get('url')}"
+        )
         if m.get("date"):
             line += f"\nDate: {m['date']}"
         line += f"\n{(doc.content or '').strip()}"
@@ -236,8 +251,10 @@ def create_mojeek_search_tool(
 
     :param name: Tool name the LLM sees.
     :param description: Tool description the LLM sees (a sensible default is provided).
-    :param search: An existing ``MojeekWebSearch``; otherwise one is built from ``search_kwargs``.
-    :param search_kwargs: Forwarded to ``MojeekWebSearch`` (e.g. ``top_k=5, search_params={...}``).
+    :param search: An existing ``MojeekWebSearch``; otherwise one is built from
+        ``search_kwargs``.
+    :param search_kwargs: Forwarded to ``MojeekWebSearch`` (e.g.
+        ``top_k=5, search_params={...}``).
     """
     component_instance = search or MojeekWebSearch(**search_kwargs)
     return ComponentTool(
@@ -245,9 +262,10 @@ def create_mojeek_search_tool(
         name=name,
         description=description
         or (
-            "Search the public web with the Mojeek search engine. Use it for current events, facts that may "
-            "have changed, or anything you are unsure about. Input a concise keyword query. Returns numbered "
-            "results with title, URL and snippet; cite URLs when using them."
+            "Search the public web with the Mojeek search engine. Use it for current "
+            "events, facts that may have changed, or anything you are unsure about. "
+            "Input a concise keyword query. Returns numbered results with title, "
+            "URL and snippet; cite URLs when using them."
         ),
         outputs_to_string={"source": "documents", "handler": format_results_for_llm},
     )
