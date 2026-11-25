@@ -12,19 +12,19 @@ class PgSkillStore(SkillStore):
         self.repo = SkillRepository()
         self.org_id = org_id
 
-    def list_skills(self) -> dict[str, SkillInfo]:
+    async def list_skills(self) -> dict[str, SkillInfo]:
         """
         Discover and return all available skills.
 
         :returns: Mapping of skill name to its metadata.
         """
-        skills = asyncio.run(self.repo.list(self.org_id))
+        skills = await self.repo.list(self.org_id)
         return {
             skill.name: SkillInfo(name=skill.name, description=skill.description)
             for skill in skills
         }
 
-    def load_skill(self, name: str) -> tuple[str, list[str]]:
+    async def load_skill(self, name: str) -> tuple[str, list[str]]:
         """
         Return the named skill's instruction body and the manifest of its bundled files.
 
@@ -34,7 +34,7 @@ class PgSkillStore(SkillStore):
             bundled files. The file list is empty when the skill bundles no extras.
         :raises KeyError: If no skill with `name` exists.
         """
-        skill_dto = asyncio.run(self.repo.load(self.org_id, name))
+        skill_dto = await self.repo.load(self.org_id, name)
         if skill_dto:
             return skill_dto.instructions, []
         else:

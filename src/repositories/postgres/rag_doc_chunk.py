@@ -6,10 +6,10 @@ from nicemvvm.tools.user import get_user_name
 
 from dtos.search_hit import SearchHit
 from src.dtos.rag_doc_chunk import RagDocumentChunkDTO
-from src.repositories.postgres.base import PostgresRepository
+from src.repositories.postgres.base import PostgresRepositoryAsync
 
 
-class RagDocumentChunkRepository(PostgresRepository):
+class RagDocumentChunkRepository(PostgresRepositoryAsync):
     """PostgreSQL repository for `rag_document` records."""
 
     async def insert(

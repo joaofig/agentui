@@ -54,9 +54,7 @@ def search_knowledge_base(
     database using hybrid vector and keyword search."""
     rag_service = RagService()
     org_id = get_org_id()
-    return asyncio.run(
-        rag_service.search_and_format(org_id=org_id, query=query, limit=limit)
-    )
+    return rag_service.search_and_format(org_id=org_id, query=query, limit=limit)
 
 
 @tool

@@ -2,10 +2,10 @@ import builtins
 from typing import LiteralString
 
 from dtos.agent_message import AgentMessageDTO
-from repositories.postgres.base import PostgresRepository
+from repositories.postgres.base import PostgresRepositoryAsync
 
 
-class AgentMessageRepository(PostgresRepository):
+class AgentMessageRepository(PostgresRepositoryAsync):
     async def list(self, agent_context_id: int) -> builtins.list[AgentMessageDTO]:
         sql: LiteralString = """
         SELECT  agent_message_id, agent_context_id, user_id, user_name,

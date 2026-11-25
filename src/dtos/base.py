@@ -10,7 +10,7 @@ class ReadOnlyDTO(BaseModel):
 
     def to_dict(self) -> dict:
         return {
-            "created_at": self.created_on.isoformat(),
+            "created_on": self.created_on.isoformat(),
             "created_by": self.created_by,
         }
 
@@ -26,7 +26,7 @@ class BaseDTO(ReadOnlyDTO):
 
     def to_dict(self) -> dict:
         return {
-            "updated_at": self.updated_on.isoformat(),
+            "updated_on": self.updated_on.isoformat(),
             "updated_by": self.updated_by,
         } | super().to_dict()
 

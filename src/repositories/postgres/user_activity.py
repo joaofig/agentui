@@ -1,10 +1,10 @@
 from typing import LiteralString
 
 from src.dtos.user_activity import UserActivityDTO
-from src.repositories.postgres.base import PostgresRepository
+from src.repositories.postgres.base import PostgresRepositoryAsync
 
 
-class UserActivityRepository(PostgresRepository):
+class UserActivityRepository(PostgresRepositoryAsync):
     def __init__(self):
         super().__init__()
 

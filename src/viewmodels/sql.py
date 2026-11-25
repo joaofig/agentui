@@ -11,7 +11,7 @@ from src.repositories.postgres.base import PostgresCentral
 
 async def run_query(query: str) -> tuple[list[dict[str, Any]], list[Column] | None]:
     """Executes a database query and returns fetched records asynchronously"""
-    conn = await PostgresCentral().connect()
+    conn = await PostgresCentral().connect_async()
     if conn:
         async with conn.cursor() as cur:
             await cur.execute(cast(LiteralString, query))
@@ -35,7 +35,7 @@ class SQLViewModel(ViewModel):
             case "run":
                 query = kwargs.get("query", "")
 
-                conn = await PostgresCentral().connect()
+                conn = await PostgresCentral().connect_async()
                 if conn:
                     try:
                         async with conn.cursor() as cur:

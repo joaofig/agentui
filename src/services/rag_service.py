@@ -80,9 +80,9 @@ class RagService:
             )
 
     @beartype
-    async def search_and_format(self, org_id: int, query: str, limit: int = 5) -> str:
+    def search_and_format(self, org_id: int, query: str, limit: int = 5) -> str:
         """Search the knowledge base and format findings as structured LLM context."""
-        hits = await self.search(org_id, query, limit=limit)
+        hits = self.search(org_id, query, limit=limit)
         if not hits:
             return (
                 "No relevant documents found in the knowledge base for "
@@ -106,9 +106,9 @@ class RagService:
         return "\n---\n".join(formatted_results)
 
     @beartype
-    async def get_document_details_formatted(self, document_id: int) -> str:
+    def get_document_details_formatted(self, document_id: int) -> str:
         """Retrieve and format all chunks of a document."""
-        chunks = await self.repository.list(document_id)
+        chunks = self.repository.list(document_id)
         if not chunks:
             return f"No chunks found for Document ID {document_id}."
 
@@ -120,10 +120,10 @@ class RagService:
         return "\n".join(lines)
 
     @beartype
-    async def list_documents_formatted(self, org_id: int, limit: int = 50) -> str:
+    def list_documents_formatted(self, org_id: int, limit: int = 50) -> str:
         """Format the list of indexed documents in the database."""
         repository = RagDocumentRepository()
-        docs = await repository.list(org_id)
+        docs = repository.list(org_id)
         if not docs:
             return (
                 "No documents are currently indexed in the PostgreSQL knowledge base."

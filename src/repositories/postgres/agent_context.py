@@ -1,10 +1,10 @@
 from typing import LiteralString
 
 from dtos.agent_context import AgentContextDTO
-from repositories.postgres.base import PostgresRepository
+from repositories.postgres.base import PostgresRepositoryAsync
 
 
-class AgentContextRepository(PostgresRepository):
+class AgentContextRepository(PostgresRepositoryAsync):
     async def load(self, agent_context_id: int) -> AgentContextDTO | None:
         sql: LiteralString = """
         SELECT      agent_context_id, user_id, user_name, context_name,

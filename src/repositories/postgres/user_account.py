@@ -2,10 +2,10 @@ import builtins
 from typing import LiteralString
 
 from src.dtos.user_account import UserAccountDTO
-from src.repositories.postgres.base import PostgresRepository
+from src.repositories.postgres.base import PostgresRepositoryAsync
 
 
-class UserAccountRepository(PostgresRepository):
+class UserAccountRepository(PostgresRepositoryAsync):
     def __init__(self):
         super().__init__()
 

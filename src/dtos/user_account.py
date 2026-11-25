@@ -1,6 +1,9 @@
 import hashlib
-from dataclasses import dataclass
+
+from datetime import datetime
 from typing import Self
+
+from pydantic import Field
 
 from nicemvvm.tools.user import dict_to_datetime
 
@@ -14,7 +17,6 @@ def hash_password(password: str) -> str:
 USER_ROLES = ["Admin", "User"]
 
 
-@dataclass
 class UserAccountDTO(BaseDTO):
     org_id: int
     user_id: int
@@ -22,6 +24,10 @@ class UserAccountDTO(BaseDTO):
     pass_hash: str
     user_role: str
     change_pass: bool = False
+    created_on: datetime = Field(default_factory=lambda: datetime.now().astimezone())
+    created_by: str = ""
+    updated_on: datetime = Field(default_factory=lambda: datetime.now().astimezone())
+    updated_by: str = ""
 
     @classmethod
     def from_dict(cls, data: dict) -> Self:
@@ -45,9 +51,9 @@ class UserAccountDTO(BaseDTO):
             "user_name": self.user_name,
             "pass_hash": self.pass_hash,
             "user_role": self.user_role,
-            "created_at": self.created_on.isoformat(),
+            "created_on": self.created_on.isoformat(),
             "created_by": self.created_by,
-            "updated_at": self.updated_on.isoformat(),
+            "updated_on": self.updated_on.isoformat(),
             "updated_by": self.updated_by,
             "change_pass": self.change_pass,
         }

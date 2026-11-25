@@ -1,10 +1,10 @@
 from typing import Any, LiteralString, cast
 
 from dtos.rag_document import RagDocumentDTO
-from repositories.postgres.base import PostgresRepository
+from repositories.postgres.base import PostgresRepositoryAsync
 
 
-class RagDocumentRepository(PostgresRepository):
+class RagDocumentRepository(PostgresRepositoryAsync):
     """PostgreSQL repository for `rag_document` records."""
 
     async def list(self, org_id: int) -> list[RagDocumentDTO]:
