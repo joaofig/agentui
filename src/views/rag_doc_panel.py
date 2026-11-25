@@ -42,14 +42,12 @@ class RagDocumentPanel(View):
                 ):
                     ui.tooltip("Export to Excel")
 
-
                 with (
                     ui.button(icon="refresh", on_click=self._on_load_documents)
                     .classes("text-xs")
                     .props("padding=xs")
                 ):
                     ui.tooltip("Refresh")
-
 
             with ui.column().classes("h-full flex-1"):
                 self.grid = RagDocumentGrid(vm)

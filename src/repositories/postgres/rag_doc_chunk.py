@@ -1,4 +1,6 @@
-from typing import LiteralString, List, Sequence
+import builtins
+from collections.abc import Sequence
+from typing import LiteralString
 
 from nicemvvm.tools.user import get_user_name
 
@@ -10,10 +12,12 @@ from src.repositories.postgres.base import PostgresRepository
 class RagDocumentChunkRepository(PostgresRepository):
     """PostgreSQL repository for `rag_document` records."""
 
-    async def insert(self, rag_doc_chunks: List[RagDocumentChunkDTO]) -> List[int]:
+    async def insert(
+        self, rag_doc_chunks: builtins.list[RagDocumentChunkDTO]
+    ) -> builtins.list[int]:
         """Insert a new `rag_document_chunk` record."""
 
-        inserted_ids: List[int] = []
+        inserted_ids: list[int] = []
 
         sql: LiteralString = """
         INSERT INTO rag_doc_chunk (
@@ -29,15 +33,18 @@ class RagDocumentChunkRepository(PostgresRepository):
         if conn:
             async with conn.cursor() as cur:
                 for chunk in rag_doc_chunks:
-                    await cur.execute(sql, (
-                        chunk.rag_doc_id,
-                        chunk.org_id,
-                        chunk.page_number,
-                        chunk.ordinal,
-                        chunk.content,
-                        chunk.embedding,
-                        get_user_name()
-                    ))
+                    await cur.execute(
+                        sql,
+                        (
+                            chunk.rag_doc_id,
+                            chunk.org_id,
+                            chunk.page_number,
+                            chunk.ordinal,
+                            chunk.content,
+                            chunk.embedding,
+                            get_user_name(),
+                        ),
+                    )
                     res = await cur.fetchone()
                     if res:
                         rag_chunk_id = res["rag_chunk_id"]
@@ -52,15 +59,20 @@ class RagDocumentChunkRepository(PostgresRepository):
                             page_count = %s
                     WHERE   rag_doc_id = %s
                     """
-                await cur.execute(sql, (len(rag_doc_chunks),
-                      max(c.page_number for c in rag_doc_chunks),
-                      rag_doc_chunks[0].rag_doc_id))
+                await cur.execute(
+                    sql,
+                    (
+                        len(rag_doc_chunks),
+                        max(c.page_number for c in rag_doc_chunks),
+                        rag_doc_chunks[0].rag_doc_id,
+                    ),
+                )
 
             await conn.commit()
             await conn.close()
         return inserted_ids
 
-    async def list(self, rag_doc_id: int) -> List[RagDocumentChunkDTO]:
+    async def list(self, rag_doc_id: int) -> builtins.list[RagDocumentChunkDTO]:
         sql = """
         SELECT  rag_chunk_id
         ,       rag_doc_id
@@ -78,7 +90,9 @@ class RagDocumentChunkRepository(PostgresRepository):
         result = await self.execute_query(sql, (rag_doc_id,))
         return [RagDocumentChunkDTO.from_dict(s) for s in result]
 
-    async def search_keyword(self, org_id: int, query: str, limit: int = 5) -> list[SearchHit]:
+    async def search_keyword(
+        self, org_id: int, query: str, limit: int = 5
+    ) -> list[SearchHit]:
         """Full-text and keyword search using PostgreSQL tsvector and ILIKE."""
         cleaned_query = query.strip()
         if not cleaned_query:
@@ -105,8 +119,10 @@ class RagDocumentChunkRepository(PostgresRepository):
               """
 
         like_pattern = f"%{cleaned_query}%"
-        rows = self.execute_query(sql,
-                                  (cleaned_query, org_id, cleaned_query, like_pattern, like_pattern, limit))
+        rows = self.execute_query(
+            sql,
+            (cleaned_query, org_id, cleaned_query, like_pattern, like_pattern, limit),
+        )
 
         hits: list[SearchHit] = []
         for row in rows:
@@ -126,10 +142,7 @@ class RagDocumentChunkRepository(PostgresRepository):
         return hits
 
     async def search_vector(
-            self,
-            org_id: int,
-            query_embedding: Sequence[float],
-            limit: int = 5
+        self, org_id: int, query_embedding: Sequence[float], limit: int = 5
     ) -> list[SearchHit]:
         """Vector similarity search using cosine distance with pgvector."""
         if not query_embedding:
@@ -153,8 +166,7 @@ class RagDocumentChunkRepository(PostgresRepository):
                 LIMIT       %s;
               """
         embeddings = list(query_embedding)
-        rows = await self.execute_query(sql,
-                                  (embeddings, org_id, embeddings, limit))
+        rows = await self.execute_query(sql, (embeddings, org_id, embeddings, limit))
         hits: list[SearchHit] = []
         for row in rows:
             hits.append(

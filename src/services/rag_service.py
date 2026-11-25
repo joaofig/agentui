@@ -1,14 +1,13 @@
 import pymupdf
 from beartype import beartype
-
 from loguru import logger
 
+from src.dtos.rag_doc_chunk import RagDocumentChunkDTO
+from src.dtos.rag_document import RagDocumentDTO
 from src.dtos.search_hit import SearchHit
 from src.repositories.postgres.rag_doc_chunk import RagDocumentChunkRepository
-from src.dtos.rag_doc_chunk import RagDocumentChunkDTO
-from src.services.embeddings import embed_texts_async, embed_query
+from src.services.embeddings import embed_query, embed_texts_async
 from src.services.pdf import extract_paragraphs
-from src.dtos.rag_document import RagDocumentDTO
 
 
 class RagService:
@@ -21,7 +20,9 @@ class RagService:
         doc: pymupdf.PdfDocument = pymupdf.open(stream=document.content, filetype="pdf")
         paragraphs = extract_paragraphs(doc)
 
-        embeddings = await embed_texts_async([str(paragraph["text"]) for paragraph in paragraphs])
+        embeddings = await embed_texts_async(
+            [str(paragraph["text"]) for paragraph in paragraphs]
+        )
 
         chunks = [
             RagDocumentChunkDTO(
@@ -32,8 +33,9 @@ class RagService:
                 content=str(paragraph.get("text", "")),
                 embedding=embedding,
             )
-            for ordinal, (paragraph, embedding)
-            in enumerate(zip(paragraphs, embeddings))
+            for ordinal, (paragraph, embedding) in enumerate(
+                zip(paragraphs, embeddings, strict=True)
+            )
         ]
         ids = await self.repository.insert(chunks)
         logger.info(f"Inserted {len(ids)} chunks")
@@ -57,7 +59,8 @@ class RagService:
             query_embedding = embed_query(cleaned_query)
         except Exception as exc:  # noqa: BLE001 - degrade gracefully to keyword search
             logger.warning(
-                f"Failed to generate embedding for query '{cleaned_query}': {exc}. Falling back to keyword search."
+                f"Failed to generate embedding for query '{cleaned_query}': {exc}. "
+                "Falling back to keyword search."
             )
 
         try:
@@ -71,20 +74,28 @@ class RagService:
             logger.error(
                 f"Hybrid search failed: {exc}. Attempting keyword-only search."
             )
-            return await self.repository.search_keyword(query=cleaned_query, limit=limit)
+            return await self.repository.search_keyword(
+                query=cleaned_query, limit=limit
+            )
 
     @beartype
-    async def search_and_format(self,  org_id: int, query: str, limit: int = 5) -> str:
-        """Search knowledge base and format findings into structured context for the LLM."""
+    async def search_and_format(self, org_id: int, query: str, limit: int = 5) -> str:
+        """Search the knowledge base and format findings as structured LLM context."""
         hits = await self.search(org_id, query, limit=limit)
         if not hits:
-            return f"No relevant documents found in the knowledge base for query: '{query}'."
+            return (
+                "No relevant documents found in the knowledge base for "
+                f"query: '{query}'."
+            )
 
         formatted_results = [
             f"Found {len(hits)} relevant passage(s) in PostgreSQL Knowledge Base:\n"
         ]
         for i, hit in enumerate(hits, start=1):
-            source_info = f"Document #{hit.document_id}: '{hit.title or hit.file_name}' (File: {hit.file_name}, Page: {hit.page})"
+            source_info = (
+                f"Document #{hit.document_id}: '{hit.title or hit.file_name}' "
+                f"(File: {hit.file_name}, Page: {hit.page})"
+            )
             formatted_results.append(
                 f"[{i}] {source_info}\n"
                 f"Relevance Score: {hit.score:.4f} (Type: {hit.search_type})\n"
@@ -102,5 +113,7 @@ class RagService:
 
         lines = [f"Document ID {document_id} Chunks ({len(chunks)}):"]
         for c in chunks:
-            lines.append(f"\n[Page {c.page_number}, Chunk #{c.ordinal}]:\n{c.content.strip()}")
+            lines.append(
+                f"\n[Page {c.page_number}, Chunk #{c.ordinal}]:\n{c.content.strip()}"
+            )
         return "\n".join(lines)

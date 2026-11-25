@@ -24,8 +24,13 @@ class AgentMessageRepository(PostgresRepository):
 
     async def save(self, message: AgentMessageDTO) -> dict:
         insert: LiteralString = """
-        INSERT INTO agent_message (user_id, user_name, role, content, created_at, created_by)
-        VALUES (%(user_id)s, %(user_name)s, %(role)s, %(content)s, %(created_at)s, %(created_by)s)
+        INSERT INTO agent_message (
+            user_id, user_name, role, content, created_at, created_by
+        )
+        VALUES (
+            %(user_id)s, %(user_name)s, %(role)s,
+            %(content)s, %(created_at)s, %(created_by)s
+        )
         RETURNING agent_message_id
         """
         update: LiteralString = ""

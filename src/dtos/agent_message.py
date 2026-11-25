@@ -1,7 +1,8 @@
 from typing import Self
 
-from dtos.base import ReadOnlyDTO
 from nicemvvm.tools.user import dict_to_datetime
+
+from dtos.base import ReadOnlyDTO
 
 
 class AgentMessageDTO(ReadOnlyDTO):

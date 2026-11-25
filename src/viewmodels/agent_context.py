@@ -5,11 +5,10 @@ from typing import Any
 import openai
 from asyncer import asyncify
 from dotenv import load_dotenv
-from nicegui import binding
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage, StreamingChunk
-
+from nicegui import binding
 from nicemvvm.viewmodels.view_model import ViewModel
 
 
@@ -30,10 +29,14 @@ class AgentContextViewModel(ViewModel):
             model="moonshotai/Kimi-K3",
             api_base_url=self.api_url,
         )
-        system_prompt = """
-            You are a helpful assistant that provides accurate and concise answers to user questions.
-            You are precise and concise. Stay on topic.
-        """
+        system_prompt = (
+            "\n"
+            "            You are a helpful assistant that provides accurate and "
+            "concise "
+            "answers to user questions.\n"
+            "            You are precise and concise. Stay on topic.\n"
+            "        "
+        )
         self.agent = Agent(
             chat_generator=self.chat_generator,
             system_prompt=system_prompt,
@@ -42,10 +45,9 @@ class AgentContextViewModel(ViewModel):
 
     def _add_prompt_to_response(self, prompt: str) -> None:
         self.response += (
-            '<div style="border:1px solid #ccc; padding:4px; border-radius:6px; font-weight: bold;'
-            + 'background-color: antiquewhite">'
-            + prompt
-            + "</div><br/>"
+            '<div style="border:1px solid #ccc; padding:4px; border-radius:6px; '
+            "font-weight: bold;"
+            'background-color: antiquewhite">' + prompt + "</div><br/>"
         )
 
     async def _send_prompt(self) -> None:
