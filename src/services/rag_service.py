@@ -27,6 +27,7 @@ class RagService:
 
         chunks = [
             RagDocumentChunkDTO(
+                rag_chunk_id=0,
                 rag_doc_id=document.rag_doc_id,
                 org_id=document.org_id,
                 page_number=int(paragraph.get("page", 0)),
