@@ -1,9 +1,10 @@
 from typing import Any
 
 from nicegui import binding
-from nicemvvm.viewmodels.view_model import ViewModel
-from src.models.user_account import UserAccountModel
 from nicemvvm.tools.observability import GridList
+from nicemvvm.viewmodels.view_model import ViewModel
+
+from src.models.user_account import UserAccountModel
 
 
 @binding.bindable_dataclass

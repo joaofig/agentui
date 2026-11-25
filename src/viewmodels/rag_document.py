@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from nicegui import binding, background_tasks, run
+from nicegui import background_tasks, binding
 from nicemvvm.tools.user import get_user_name
 from nicemvvm.viewmodels.view_model import ViewModel
 

@@ -51,8 +51,10 @@ class UserAccountRepository(PostgresRepository):
         RETURNING user_id
         """
         update: LiteralString = """
-        UPDATE user_account SET user_name = %(user_name)s, pass_hash = %(pass_hash)s, user_role = %(user_role)s,
-                        change_pass = %(change_pass)s, updated_at = %(updated_at)s, updated_by = %(updated_by)s
+        UPDATE user_account
+        SET     user_name = %(user_name)s, pass_hash = %(pass_hash)s,
+                user_role = %(user_role)s, change_pass = %(change_pass)s,
+                updated_at = %(updated_at)s, updated_by = %(updated_by)s
         WHERE   user_id = %(user_id)s
         RETURNING user_id
         """

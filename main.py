@@ -16,7 +16,8 @@ from src.viewmodels.user_account import UserAccountViewModel
 from src.views.admin.dialogs.password_dialog import PasswordDialog
 from src.views.main_view import MainView
 
-# top-level static routes like /favicon.ico must be unrestricted, otherwise the middleware redirects them to /login
+# Top-level static routes like /favicon.ico must be unrestricted; otherwise the
+# middleware redirects them to /login.
 unrestricted_page_routes = {"/favicon.ico", "/login"}
 
 
@@ -136,7 +137,8 @@ def add_inactivity_timeout(timeout_seconds: float, on_timeout):
         let timer;
         function reset() {{
             clearTimeout(timer);
-            timer = setTimeout(() => emitEvent('inactivity_timeout'), {timeout_seconds * 1000});
+            timer = setTimeout(
+                () => emitEvent('inactivity_timeout'), {timeout_seconds * 1000});
         }}
         ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(evt =>
             document.addEventListener(evt, reset, true));

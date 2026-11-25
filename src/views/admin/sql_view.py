@@ -1,9 +1,9 @@
 from nicegui import ui
 from nicegui.binding import bind_from
-
+from nicemvvm.tools.excel import export_to_excel
 from nicemvvm.viewmodels.view_model import ViewModel
 from nicemvvm.views.view import View
-from nicemvvm.tools.excel import export_to_excel
+
 from src.views.admin.sql_grid import SQLGrid
 
 
@@ -30,19 +30,23 @@ class SQLView(View):
                     ui.tooltip("Export to Excel")
 
             with ui.column().classes("h-full flex-1"):
-                with ui.splitter(value=50, horizontal=True).classes(
+                splitter_element = ui.splitter(value=50, horizontal=True).classes(
                     "w-full h-full"
-                ) as splitter:
-                    with splitter.before:
-                        with ui.row().classes("w-full h-full border-1 border-gray-200"):
-                            self.editor = (
-                                ui.codemirror(language="PostgreSQL")
-                                .classes("w-full h-full")
-                                .bind_value(vm, "query")
-                            )
-                            self.editor.map_key("F5", self._run_query)
-                            self.editor.map_key("Shift-Enter", self._run_selection)
-                            # self.editor.run_method()
+                )
+                with splitter_element as splitter:
+                    before_pane = splitter.before
+                    with (
+                        before_pane,
+                        ui.row().classes("w-full h-full border-1 border-gray-200"),
+                    ):
+                        self.editor = (
+                            ui.codemirror(language="PostgreSQL")
+                            .classes("w-full h-full")
+                            .bind_value(vm, "query")
+                        )
+                        self.editor.map_key("F5", self._run_query)
+                        self.editor.map_key("Shift-Enter", self._run_selection)
+                        # self.editor.run_method()
 
                     with splitter.after:
                         with ui.tabs().props("dense no-caps") as self.tabs:

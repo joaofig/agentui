@@ -1,11 +1,9 @@
-from dataclasses import dataclass
 from datetime import datetime
-from typing import Self, Any
+from typing import Self
 
 from src.dtos.base import BaseDTO
 
 
-@dataclass
 class SkillDTO(BaseDTO):
     skill_id: int
     org_id: int
@@ -25,7 +23,6 @@ class SkillDTO(BaseDTO):
             instructions=data.get("instructions", ""),
             enabled=data.get("enabled", False),
             version=data.get("version", 0),
-
             created_on=data.get("created_on", datetime.now().astimezone()),
             created_by=data.get("created_by", "admin"),
             updated_on=data.get("updated_on", datetime.now().astimezone()),
@@ -41,7 +38,6 @@ class SkillDTO(BaseDTO):
             "instructions": self.instructions,
             "enabled": self.enabled,
             "version": self.version,
-
             "created_on": self.created_on,
             "created_by": self.created_by,
             "updated_on": self.updated_on,

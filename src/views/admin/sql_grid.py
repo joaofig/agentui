@@ -1,7 +1,6 @@
 from nicegui import ui
 from nicegui.elements.aggrid import AgGrid
 from nicegui.observables import ObservableList
-
 from nicemvvm.viewmodels.view_model import ViewModel
 from nicemvvm.views.view import View
 
@@ -27,7 +26,8 @@ class SQLGrid(View):
         grid_def = {
             "columnDefs": [],
             # "autoGenerateColumnDefs": True,
-            # Placeholder for rowData; in a real application, this would be populated from a data source
+            # Placeholder for rowData; in a real application, this would be
+            # populated from a data source.
             # For example: 'rowData': get_studies_from_database()
             "rowData": [],
             "rowSelection": {

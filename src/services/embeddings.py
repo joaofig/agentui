@@ -1,8 +1,8 @@
 import os
-from typing import Sequence
+from collections.abc import Sequence
 
 from beartype import beartype
-from openai import OpenAI, AsyncOpenAI
+from openai import AsyncOpenAI, OpenAI
 
 DEFAULT_EMBED_MODEL = (
     os.getenv("AGENT_EMBED_MODEL")
@@ -41,7 +41,8 @@ def embed_texts(
     Args:
         texts: List of text strings to embed.
         model: Embedding model name.
-        dimensions: Target embedding dimension (for models supporting Matryoshka embeddings).
+        dimensions: Target embedding dimension (for models supporting Matryoshka
+            embeddings).
         max_sequence_length: Maximum sequence length for text inputs.
 
     Returns:
@@ -64,7 +65,8 @@ def embed_texts(
                 dimensions=dimensions,
             )
         except Exception as e:  # noqa: BLE001 - fallback for any API error
-            # Fallback without explicit dimensions if model doesn't support dimensions param
+            # Fallback without explicit dimensions if model doesn't support the
+            # dimensions parameter.
             print(e)
             response = client.embeddings.create(
                 input=chunk,
@@ -88,7 +90,8 @@ async def embed_texts_async(
     Args:
         texts: List of text strings to embed.
         model: Embedding model name.
-        dimensions: Target embedding dimension (for models supporting Matryoshka embeddings).
+        dimensions: Target embedding dimension (for models supporting Matryoshka
+            embeddings).
         max_sequence_length: Maximum sequence length for text inputs.
 
     Returns:
@@ -111,7 +114,8 @@ async def embed_texts_async(
                 dimensions=dimensions,
             )
         except Exception as e:  # noqa: BLE001 - fallback for any API error
-            # Fallback without explicit dimensions if model doesn't support dimensions param
+            # Fallback without explicit dimensions if model doesn't support the
+            # dimensions parameter.
             print(e)
             response = await client.embeddings.create(
                 input=chunk,

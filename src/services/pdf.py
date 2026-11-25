@@ -2,13 +2,15 @@ import re
 from pathlib import Path
 
 import pymupdf as fitz  # PyMuPDF
-from haystack import Document, Pipeline, component
+from haystack import Document, component
 from pymupdf import pymupdf
 
 
 @component
 class PyMuPDFParagraphConverter:
-    """Converts PDFs to one Document per page, with paragraphs separated by blank lines."""
+    """Convert PDFs to one Document per page, with paragraphs separated by
+    blank lines.
+    """
 
     def __init__(self, min_chars: int = 20):
         self.min_chars = min_chars
@@ -42,11 +44,17 @@ class PyMuPDFParagraphConverter:
 
 # pipeline = Pipeline()
 # pipeline.add_component("converter", PyMuPDFParagraphConverter())
-# pipeline.add_component("splitter", DocumentSplitter(split_by="passage", split_length=1))
+# pipeline.add_component(
+#     "splitter", DocumentSplitter(split_by="passage", split_length=1)
+# )
 # pipeline.connect("converter", "splitter")
 #
 # result = pipeline.run({"converter": {"sources": ["document.pdf"]}})
-# paragraphs = [d.content.strip() for d in result["splitter"]["documents"] if d.content.strip()]
+# paragraphs = [
+#     d.content.strip()
+#     for d in result["splitter"]["documents"]
+#     if d.content.strip()
+# ]
 
 
 def clean_block(text: str) -> str:
@@ -55,7 +63,9 @@ def clean_block(text: str) -> str:
     return re.sub(r"\s{2,}", " ", text).strip()
 
 
-def extract_paragraphs(doc: pymupdf.Document, min_chars: int = 20) -> list[dict[str, int|str]]:
+def extract_paragraphs(
+    doc: pymupdf.Document, min_chars: int = 20
+) -> list[dict[str, int | str]]:
     paragraphs = []
     for page in doc:
         for *_, text, _, block_type in page.get_text("blocks", sort=True):
