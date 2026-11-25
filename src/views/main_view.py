@@ -4,9 +4,11 @@ from nicemvvm.tools.user import logout
 
 from src.viewmodels.chat import ChatViewModel
 from src.viewmodels.rag_document_list import RagDocumentListViewModel
+from src.viewmodels.skill_list import SkillListViewModel
 from src.views.admin.admin_panel import AdminPanel
 from src.views.chat_panel import ChatPanel
 from src.views.rag_doc_panel import RagDocumentPanel
+from src.views.skill_panel import SkillPanel
 
 
 class MainView:
@@ -21,6 +23,7 @@ class MainView:
                 with ui.tabs().props("dense no-caps") as tabs:
                     agent = ui.tab("Agent").classes("text-sky-800")
                     documents = ui.tab("Documents").classes("text-sky-800")
+                    skills = ui.tab("Skills").classes("text-sky-800")
                     admin = ui.tab("Admin").classes("text-sky-800")
 
                     # Only visible to Admin users
@@ -47,6 +50,11 @@ class MainView:
                     rag_doc_list_vm = RagDocumentListViewModel()
                     RagDocumentPanel(rag_doc_list_vm)
                     ManagedTasks().create(rag_doc_list_vm.call("load"))
+
+                with ui.tab_panel(skills).classes("pl-4 pt-0 pb-0 pr-4"):
+                    skill_list_vm = SkillListViewModel()
+                    SkillPanel(skill_list_vm)
+                    ManagedTasks().create(skill_list_vm.call("load"))
 
                 with ui.tab_panel(admin).classes("pl-4 pt-0 pb-0 pr-4"):
                     if user_role == "Admin":

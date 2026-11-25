@@ -41,31 +41,29 @@ def retrieve_org_id() -> int:
 
 @tool
 def search_knowledge_base(
-        query: Annotated[
-            str,
-            "The search query or keywords to look up in the remote PostgreSQL "
-            "knowledge base.",
-        ],
-        limit: Annotated[
-            int, "Maximum number of relevant document passages to retrieve (default: 5)"
-        ] = 5,
+    query: Annotated[
+        str,
+        "The search query or keywords to look up in the remote PostgreSQL "
+        "knowledge base.",
+    ],
+    limit: Annotated[
+        int, "Maximum number of relevant document passages to retrieve (default: 5)"
+    ] = 5,
 ) -> str:
     """Search for relevant documents and text chunks in the remote PostgreSQL
     database using hybrid vector and keyword search."""
     rag_service = RagService()
     org_id = get_org_id()
     return asyncio.run(
-        rag_service.search_and_format(
-            org_id=org_id, query=query, limit=limit
-        )
+        rag_service.search_and_format(org_id=org_id, query=query, limit=limit)
     )
 
 
 @tool
 def list_knowledge_base_documents(
-        limit: Annotated[
-            int, "Maximum number of document entries to list (default: 20)"
-        ] = 20,
+    limit: Annotated[
+        int, "Maximum number of document entries to list (default: 20)"
+    ] = 20,
 ) -> str:
     """List all documents currently indexed in the remote PostgreSQL database."""
     rag_service = RagService()
@@ -75,9 +73,7 @@ def list_knowledge_base_documents(
 
 @tool
 def get_document_details(
-        document_id: Annotated[
-            int, "The numeric ID of the document to inspect in detail."
-        ],
+    document_id: Annotated[int, "The numeric ID of the document to inspect in detail."],
 ) -> str:
     """Retrieve all content chunks and page details for a specific document
     by its ID."""
