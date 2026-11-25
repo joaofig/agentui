@@ -1,6 +1,7 @@
 from typing import Any, cast
 
 from haystack.dataclasses import ChatMessage, StreamingChunk
+from haystack.skill_stores.types import SkillStore
 from nicegui import binding
 from nicemvvm.tools.observability import GridList
 from nicemvvm.viewmodels.view_model import ViewModel
@@ -10,7 +11,7 @@ from services.chat_agent import ChatAgent
 
 @binding.bindable_dataclass
 class ChatViewModel(ViewModel):
-    def __init__(self):
+    def __init__(self, skill_store: SkillStore):
         super().__init__()
 
         self.thread = GridList()
@@ -19,7 +20,7 @@ class ChatViewModel(ViewModel):
         self.stream_visible: bool = False
         self.reason_text: str = ""
         self.reason_visible: bool = False
-        self.chat_agent = ChatAgent()
+        self.chat_agent = ChatAgent(skill_store)
         self.chat_agent.subscribe("stream_reply", self._on_stream_reply)
         self.chat_agent.subscribe("reply", self._on_final_reply)
         self.enabled: bool = True

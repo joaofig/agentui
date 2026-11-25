@@ -2,6 +2,8 @@ from nicegui import app, ui
 from nicemvvm.tools.tasks import ManagedTasks
 from nicemvvm.tools.user import logout
 
+from src.services.mem_skill_store import MemSkillStore
+from src.services.user import get_org_id
 from src.viewmodels.chat import ChatViewModel
 from src.viewmodels.rag_document_list import RagDocumentListViewModel
 from src.viewmodels.skill_list import SkillListViewModel
@@ -43,7 +45,9 @@ class MainView:
                 "h-full w-full"
             ):
                 with ui.tab_panel(agent).classes("pl-4 pt-0 pb-0 pr-4"):
-                    chat_vm = ChatViewModel()
+                    skill_store = MemSkillStore(org_id=get_org_id())
+                    ManagedTasks().create(skill_store.load())
+                    chat_vm = ChatViewModel(skill_store)
                     ChatPanel(chat_vm)
 
                 with ui.tab_panel(documents).classes("pl-4 pt-0 pb-0 pr-4"):

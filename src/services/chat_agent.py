@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage, ChatRole, StreamingChunk
+from haystack.skill_stores.types import SkillStore
 from haystack.tools import SkillToolset, tool
 from haystack.utils import Secret
 from nicemvvm.tools.messenger import Messenger
@@ -66,7 +67,7 @@ def list_knowledge_base_documents(
     """List all documents currently indexed in the remote PostgreSQL database."""
     rag_service = RagService()
     org_id = get_org_id()
-    return asyncio.run(rag_service.list_documents_formatted(org_id=org_id, limit=limit))
+    return rag_service.list_documents_formatted(org_id=org_id, limit=limit)
 
 
 @tool
@@ -76,13 +77,11 @@ def get_document_details(
     """Retrieve all content chunks and page details for a specific document
     by its ID."""
     rag_service = RagService()
-    return asyncio.run(
-        rag_service.get_document_details_formatted(document_id=document_id)
-    )
+    return rag_service.get_document_details_formatted(document_id=document_id)
 
 
 class ChatAgent:
-    def __init__(self):
+    def __init__(self, skill_store: SkillStore):
         load_dotenv()
         self.messenger = Messenger()
         self.messages = [ChatMessage.from_system(SYSTEM_PROMPT)]
@@ -90,7 +89,7 @@ class ChatAgent:
         self.partial: list[str] = []
         self.org_id = get_org_id()
         self.rag_service = RagService()
-        self.skills_toolset = SkillToolset(PgSkillStore(org_id=self.org_id))
+        self.skills_toolset = SkillToolset(skill_store)
 
         web_search = create_mojeek_search_tool(
             top_k=5,

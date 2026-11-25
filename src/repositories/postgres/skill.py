@@ -1,15 +1,15 @@
 from typing import LiteralString
 
-from repositories.postgres.base import PostgresRepositorySync
+from repositories.postgres.base import PostgresRepositoryAsync
 from src.dtos.skill import SkillDTO
 
 
-class SkillRepository(PostgresRepositorySync):
+class SkillRepository(PostgresRepositoryAsync):
     def __init__(self) -> None:
         """Initialize the skill repository."""
         super().__init__()
 
-    def list(self, org_id: int = 1) -> list[SkillDTO]:
+    async def list(self, org_id: int = 1) -> list[SkillDTO]:
         """List skills belonging to an organization.
 
         Args:
@@ -33,10 +33,10 @@ class SkillRepository(PostgresRepositorySync):
             FROM    skill
             WHERE   org_id = %s
         """
-        result = self.execute_query(sql, (org_id,))
+        result = await self.execute_query(sql, (org_id,))
         return [SkillDTO.from_dict(row) for row in result]
 
-    def load(self, org_id: int = 1, name: str = "") -> SkillDTO | None:
+    async def load(self, org_id: int = 1, name: str = "") -> SkillDTO | None:
         """Load a skill by its name within an organization.
 
         Args:
@@ -61,12 +61,12 @@ class SkillRepository(PostgresRepositorySync):
             FROM    skill
             WHERE   org_id = %s and name = %s
         """
-        result = self.execute_query(sql, (org_id, name))
+        result = await self.execute_query(sql, (org_id, name))
         if result:
             return SkillDTO.from_dict(result[0])
         return None
 
-    def save(self, skill: SkillDTO) -> dict[str, object]:
+    async def save(self, skill: SkillDTO) -> dict[str, object]:
         """Insert a skill or update an existing skill.
 
         Args:
@@ -100,11 +100,11 @@ class SkillRepository(PostgresRepositorySync):
             WHERE skill_id = %(skill_id)s
                 AND org_id = %(org_id)s
         """
-        return self.insert_or_update(
+        return await self.insert_or_update(
             insert, update, skill.to_dict(), key_field="skill_id"
         )
 
-    def delete(self, skill_id: int, org_id: int) -> None:
+    async def delete(self, skill_id: int, org_id: int) -> None:
         """Delete a skill only when it belongs to the requested organization.
 
         Args:
@@ -116,4 +116,4 @@ class SkillRepository(PostgresRepositorySync):
             WHERE skill_id = %s
                 AND org_id = %s
         """
-        self.execute_query(sql, (skill_id, org_id))
+        await self.execute_query(sql, (skill_id, org_id))

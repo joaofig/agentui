@@ -1,4 +1,3 @@
-import asyncio
 from typing import Any, Self
 
 from haystack.dataclasses import FileContent, ImageContent, SkillInfo
