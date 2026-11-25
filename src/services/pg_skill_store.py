@@ -1,4 +1,5 @@
-from typing import Any
+import asyncio
+from typing import Any, Self
 
 from haystack.dataclasses import ImageContent, FileContent, SkillInfo
 from haystack.skill_stores.types import SkillStore
@@ -10,6 +11,7 @@ class PgSkillStore(SkillStore):
 
     def __init__(self, org_id: int = 1):
         self.repo = SkillRepository()
+        self.org_id = org_id
 
 
     def list_skills(self) -> dict[str, SkillInfo]:
@@ -18,7 +20,12 @@ class PgSkillStore(SkillStore):
 
         :returns: Mapping of skill name to its metadata.
         """
-        ...
+        skills = asyncio.run(self.repo.list(self.org_id))
+        return {
+            skill.name: SkillInfo(name=skill.name, description=skill.description)
+            for skill in skills
+        }
+
 
     def load_skill(self, name: str) -> tuple[str, list[str]]:
         """
@@ -29,7 +36,11 @@ class PgSkillStore(SkillStore):
             to the skill root for any bundled files). The file list is empty when the skill bundles no extras.
         :raises KeyError: If no skill with `name` exists.
         """
-        ...
+        skill_dto = asyncio.run(self.repo.load(self.org_id, name))
+        if skill_dto:
+            return skill_dto.instructions, []
+        else:
+            raise KeyError(f"Skill '{name}' not found")
 
     def read_skill_file(self, name: str, path: str) -> str | ImageContent | FileContent:
         """
@@ -55,7 +66,7 @@ class PgSkillStore(SkillStore):
         ...
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SkillStore":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         """
         Deserialize a store from a dictionary produced by `to_dict`.
 

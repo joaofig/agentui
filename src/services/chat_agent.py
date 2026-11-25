@@ -9,8 +9,11 @@ from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage, ChatRole, StreamingChunk
 from haystack.tools import tool
 from haystack.utils import Secret
+from haystack.tools import SkillToolset
 from nicemvvm.tools.messenger import Messenger
 
+from services.chat_tools import get_current_time
+from services.pg_skill_store import PgSkillStore
 from src.services.rag_service import RagService
 from src.services.user import get_org_id
 from src.services.mojeek_search import create_mojeek_search_tool
@@ -36,6 +39,7 @@ class ChatAgent:
         self.partial: List[str] = []
         self.org_id = get_org_id()
         self.rag_service = RagService()
+        self.skills_toolset = SkillToolset(PgSkillStore(org_id=self.org_id))
 
         web_search = create_mojeek_search_tool(
             top_k=5,
@@ -52,7 +56,14 @@ class ChatAgent:
         )
         self.agent = Agent(
             chat_generator=chat_generator,
-            tools=[web_search],
+            tools=[
+                web_search,
+                get_current_time,
+                self.search_knowledge_base,
+                self.list_knowledge_base_documents,
+                self.get_document_details,
+                self.skills_toolset,
+            ],
             # max_agent_steps=10,
         )
         self.agent.warm_up()

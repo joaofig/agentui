@@ -23,7 +23,28 @@ class SkillRepository(PostgresRepository):
             ,       updated_on
             ,       updated_by
             FROM    skill
-            WHERE   org_id = :org_id
+            WHERE   org_id = %s
         """
         result = await self.execute_query(sql, (org_id, ))
         return [SkillDTO.from_dict(row) for row in result]
+
+    async def load(self, org_id: int = 1, name: str = "") -> SkillDTO | None:
+        sql = """
+            SELECT  skill_id
+            ,       org_id
+            ,       name
+            ,       description
+            ,       instructions
+            ,       enabled
+            ,       version
+            ,       created_on
+            ,       created_by
+            ,       updated_on
+            ,       updated_by
+            FROM    skill
+            WHERE   org_id = %s and name = %s
+        """
+        result = await self.execute_query(sql, (org_id, name))
+        if result:
+            return SkillDTO.from_dict(result[0])
+        return None
