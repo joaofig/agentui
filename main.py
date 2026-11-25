@@ -91,6 +91,7 @@ async def login(redirect_to: str = "/") -> RedirectResponse | None:
                 username=username.value,
                 user_role=user.user_role,
                 user_id=user.user_id,
+                org_id=user.org_id,
                 authenticated=True,
                 login_time=datetime.now(),
             )

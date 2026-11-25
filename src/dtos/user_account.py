@@ -15,6 +15,7 @@ USER_ROLES = ["Admin", "User"]
 
 @dataclass
 class UserAccountDTO(BaseDTO):
+    org_id: int
     user_id: int
     user_name: str
     pass_hash: str
@@ -24,6 +25,7 @@ class UserAccountDTO(BaseDTO):
     @classmethod
     def from_dict(cls, data: dict) -> Self:
         return cls(
+            org_id=data.get("org_id", 0),
             user_id=data.get("user_id", 0),
             user_name=data.get("user_name", ""),
             pass_hash=data.get("pass_hash", ""),
@@ -37,6 +39,7 @@ class UserAccountDTO(BaseDTO):
 
     def to_dict(self) -> dict:
         return {
+            "org_id": self.org_id,
             "user_id": self.user_id,
             "user_name": self.user_name,
             "pass_hash": self.pass_hash,

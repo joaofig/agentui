@@ -1,15 +1,18 @@
 import asyncio
 import os
 from collections.abc import Awaitable, Callable
-from typing import List
+from typing import List, Annotated
 
 from dotenv import load_dotenv
 from haystack.components.agents import Agent
 from haystack.components.generators.chat import OpenAIChatGenerator
 from haystack.dataclasses import ChatMessage, ChatRole, StreamingChunk
+from haystack.tools import tool
 from haystack.utils import Secret
 from nicemvvm.tools.messenger import Messenger
 
+from src.services.rag_service import RagService
+from src.services.user import get_org_id
 from src.services.mojeek_search import create_mojeek_search_tool
 
 SYSTEM_PROMPT = """
@@ -31,6 +34,8 @@ class ChatAgent:
         self.messages = [ChatMessage.from_system(SYSTEM_PROMPT)]
         self.task: asyncio.Task | None = None
         self.partial: List[str] = []
+        self.org_id = get_org_id()
+        self.rag_service = RagService()
 
         web_search = create_mojeek_search_tool(
             top_k=5,
@@ -92,3 +97,39 @@ class ChatAgent:
     def stop(self) -> None:
         if self.task and not self.task.done():
             self.task.cancel()
+
+
+    @tool
+    def search_knowledge_base(self,
+        query: Annotated[
+            str,
+            "The search query or keywords to look up in the remote PostgreSQL knowledge base.",
+        ],
+        limit: Annotated[
+            int, "Maximum number of relevant document passages to retrieve (default: 5)"
+        ] = 5,
+    ) -> str:
+        """Search for relevant documents and text chunks in the remote PostgreSQL database using hybrid vector and keyword search."""
+        return asyncio.run(self.rag_service.search_and_format(org_id=self.org_id, query=query, limit=limit))
+
+
+    @tool
+    def list_knowledge_base_documents(self,
+        limit: Annotated[
+            int, "Maximum number of document entries to list (default: 20)"
+        ] = 20,
+    ) -> str:
+        """List all documents currently indexed in the remote PostgreSQL database."""
+        return asyncio.run(
+            self.rag_service.list_documents_formatted(limit=limit)
+        )
+
+
+    @tool
+    def get_document_details(self,
+        document_id: Annotated[int, "The numeric ID of the document to inspect in detail."],
+    ) -> str:
+        """Retrieve all content chunks and page details for a specific document by its ID."""
+        return asyncio.run(
+            self.rag_service.get_document_details_formatted(document_id=document_id)
+        )

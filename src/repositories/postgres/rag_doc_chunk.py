@@ -60,8 +60,25 @@ class RagDocumentChunkRepository(PostgresRepository):
             await conn.close()
         return inserted_ids
 
+    async def list(self, rag_doc_id: int) -> List[RagDocumentChunkDTO]:
+        sql = """
+        SELECT  rag_chunk_id
+        ,       rag_doc_id
+        ,       org_id
+        ,       page_number
+        ,       ordinal
+        ,       content
+        ,       created_on
+        ,       created_by
+        
+        FROM    rag_doc_chunk
+        WHERE   rag_doc_id = %s;
+            
+        """
+        result = await self.execute_query(sql, (rag_doc_id,))
+        return [RagDocumentChunkDTO.from_dict(s) for s in result]
 
-    async def search_keyword(self, query: str, limit: int = 5) -> list[SearchHit]:
+    async def search_keyword(self, org_id: int, query: str, limit: int = 5) -> list[SearchHit]:
         """Full-text and keyword search using PostgreSQL tsvector and ILIKE."""
         cleaned_query = query.strip()
         if not cleaned_query:
@@ -79,16 +96,17 @@ class RagDocumentChunkRepository(PostgresRepository):
                         ts_rank_cd(c.tsv, plainto_tsquery('english', %s)) AS rank_score
                 FROM    rag_doc_chunk c
                 JOIN    rag_document d ON c.rag_doc_id = d.rag_doc_id
-                WHERE   c.tsv @@ plainto_tsquery('english', %s)
-                        OR c.content ILIKE %s
-                        OR d.title ILIKE %s
+                WHERE   c.org_id = %s
+                        AND (c.tsv @@ plainto_tsquery('english', %s) 
+                                OR c.content ILIKE %s
+                                OR d.title ILIKE %s)
               ORDER BY  rank_score DESC, c.rag_chunk_id
               LIMIT     %s;
               """
 
         like_pattern = f"%{cleaned_query}%"
         rows = self.execute_query(sql,
-                                  (cleaned_query, cleaned_query, like_pattern, like_pattern, limit))
+                                  (cleaned_query, org_id, cleaned_query, like_pattern, like_pattern, limit))
 
         hits: list[SearchHit] = []
         for row in rows:
@@ -156,6 +174,7 @@ class RagDocumentChunkRepository(PostgresRepository):
 
     async def hybrid_search(
         self,
+        org_id: int,
         query: str,
         query_embedding: Sequence[float] | None = None,
         limit: int = 5,
@@ -168,9 +187,9 @@ class RagDocumentChunkRepository(PostgresRepository):
         """
         # Retrieve candidate pools for both methods
         candidate_k = max(limit * 3, 20)
-        kw_hits = await self.search_keyword(query, limit=candidate_k)
+        kw_hits = await self.search_keyword(org_id, query, limit=candidate_k)
         vec_hits = (
-            await self.search_vector(query_embedding, limit=candidate_k)
+            await self.search_vector(org_id, query_embedding, limit=candidate_k)
             if query_embedding
             else []
         )
