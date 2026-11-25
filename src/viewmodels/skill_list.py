@@ -57,7 +57,7 @@ class SkillListViewModel(ViewModel):
                 skill_id = int(kwargs.get("skill_id", self.selected_id) or 0)
                 org_id = int(kwargs.get("org_id", self.org_id))
                 if skill_id > 0 and org_id > 0:
-                    await self.repo.delete(skill_id=skill_id, org_id=org_id)
+                    await self.repository.delete(skill_id=skill_id, org_id=org_id)
                     await self.load(org_id=org_id)
                     self.selected_id = 0
                     self.delete_enabled = False
