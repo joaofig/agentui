@@ -33,6 +33,60 @@ SYSTEM_PROMPT = (
 )
 
 
+@tool
+def retrieve_org_id() -> int:
+    """Retrieve the organization ID for the current user."""
+    return get_org_id()
+
+
+@tool
+def search_knowledge_base(
+        query: Annotated[
+            str,
+            "The search query or keywords to look up in the remote PostgreSQL "
+            "knowledge base.",
+        ],
+        limit: Annotated[
+            int, "Maximum number of relevant document passages to retrieve (default: 5)"
+        ] = 5,
+) -> str:
+    """Search for relevant documents and text chunks in the remote PostgreSQL
+    database using hybrid vector and keyword search."""
+    rag_service = RagService()
+    org_id = get_org_id()
+    return asyncio.run(
+        rag_service.search_and_format(
+            org_id=org_id, query=query, limit=limit
+        )
+    )
+
+
+@tool
+def list_knowledge_base_documents(
+        limit: Annotated[
+            int, "Maximum number of document entries to list (default: 20)"
+        ] = 20,
+) -> str:
+    """List all documents currently indexed in the remote PostgreSQL database."""
+    rag_service = RagService()
+    org_id = get_org_id()
+    return asyncio.run(rag_service.list_documents_formatted(org_id=org_id, limit=limit))
+
+
+@tool
+def get_document_details(
+        document_id: Annotated[
+            int, "The numeric ID of the document to inspect in detail."
+        ],
+) -> str:
+    """Retrieve all content chunks and page details for a specific document
+    by its ID."""
+    rag_service = RagService()
+    return asyncio.run(
+        rag_service.get_document_details_formatted(document_id=document_id)
+    )
+
+
 class ChatAgent:
     def __init__(self):
         load_dotenv()
@@ -62,9 +116,9 @@ class ChatAgent:
             tools=[
                 web_search,
                 get_current_time,
-                self.search_knowledge_base,
-                self.list_knowledge_base_documents,
-                self.get_document_details,
+                search_knowledge_base,
+                list_knowledge_base_documents,
+                get_document_details,
                 self.skills_toolset,
             ],
             # max_agent_steps=10,
@@ -111,46 +165,3 @@ class ChatAgent:
     def stop(self) -> None:
         if self.task and not self.task.done():
             self.task.cancel()
-
-    @tool
-    def search_knowledge_base(
-        self,
-        query: Annotated[
-            str,
-            "The search query or keywords to look up in the remote PostgreSQL "
-            "knowledge base.",
-        ],
-        limit: Annotated[
-            int, "Maximum number of relevant document passages to retrieve (default: 5)"
-        ] = 5,
-    ) -> str:
-        """Search for relevant documents and text chunks in the remote PostgreSQL
-        database using hybrid vector and keyword search."""
-        return asyncio.run(
-            self.rag_service.search_and_format(
-                org_id=self.org_id, query=query, limit=limit
-            )
-        )
-
-    @tool
-    def list_knowledge_base_documents(
-        self,
-        limit: Annotated[
-            int, "Maximum number of document entries to list (default: 20)"
-        ] = 20,
-    ) -> str:
-        """List all documents currently indexed in the remote PostgreSQL database."""
-        return asyncio.run(self.rag_service.list_documents_formatted(limit=limit))
-
-    @tool
-    def get_document_details(
-        self,
-        document_id: Annotated[
-            int, "The numeric ID of the document to inspect in detail."
-        ],
-    ) -> str:
-        """Retrieve all content chunks and page details for a specific document
-        by its ID."""
-        return asyncio.run(
-            self.rag_service.get_document_details_formatted(document_id=document_id)
-        )

@@ -2,6 +2,7 @@ import pymupdf
 from beartype import beartype
 from loguru import logger
 
+from repositories.postgres.rag_document import RagDocumentRepository
 from src.dtos.rag_doc_chunk import RagDocumentChunkDTO
 from src.dtos.rag_document import RagDocumentDTO
 from src.dtos.search_hit import SearchHit
@@ -115,5 +116,24 @@ class RagService:
         for c in chunks:
             lines.append(
                 f"\n[Page {c.page_number}, Chunk #{c.ordinal}]:\n{c.content.strip()}"
+            )
+        return "\n".join(lines)
+
+    @beartype
+    async def list_documents_formatted(self, org_id: int, limit: int = 50) -> str:
+        """Format the list of indexed documents in the database."""
+        repository = RagDocumentRepository()
+        docs = await repository.list(org_id)
+        if not docs:
+            return (
+                "No documents are currently indexed in the PostgreSQL knowledge base."
+            )
+        docs = docs[:limit]
+
+        lines = [f"Indexed Documents ({len(docs)}):"]
+        for d in docs:
+            lines.append(
+                f"- ID: {d.rag_doc_id} | Title: '{d.title}' | File: '{d.file_name}' | "
+                f"Pages: {d.page_count} | Chunks: {d.chunk_count} | Status: {d.status}"
             )
         return "\n".join(lines)
