@@ -39,3 +39,8 @@ quote-style = "double"
 
 [tool.uv.sources]
 nicemvvm = { path = "../nicemvvm", editable = true }
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+]

@@ -11,7 +11,7 @@ from src.repositories.postgres.skill import SkillRepository
 
 @binding.bindable_dataclass
 class SkillViewModel(ViewModel):
-    """View model for a single skill."""
+    """View model for editing an individual skill."""
 
     skill_id: int = 0
     org_id: int = 1
@@ -97,10 +97,29 @@ class SkillViewModel(ViewModel):
             updated_by=get_user_name(),
         )
 
+    async def load(self, org_id: int | None = None, name: str | None = None) -> None:
+        """Load a skill by organization and name.
+
+        Args:
+            org_id: Organization owning the skill; defaults to this view model's
+                organization.
+            name: Skill name to load; defaults to this view model's name.
+        """
+        repository = SkillRepository()
+        skill = await repository.load(
+            org_id=self.org_id if org_id is None else org_id,
+            name=self.name if name is None else name,
+        )
+        if skill:
+            self.copy(skill)
+
     async def save(self) -> None:
         """Persist this skill and update its generated ID when inserted."""
         skill = self.to_dto()
-        saved_skill = await SkillRepository().save(skill)
-        skill_id = saved_skill.get("skill_id")
+        skill.log_change(self.skill_id)
+        repository = SkillRepository()
+        result = await repository.save(skill)
+        skill_id = result.get("skill_id")
         if isinstance(skill_id, int) and skill_id > 0:
-            self.skill_id = skill_id
+            skill.skill_id = skill_id
+        self.copy(skill)

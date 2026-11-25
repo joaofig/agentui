@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Self
+from typing import Any, Self
 
 from src.dtos.base import BaseDTO
 
@@ -14,8 +14,16 @@ class SkillDTO(BaseDTO):
     version: int
 
     @classmethod
-    def from_dict(cls, data: dict) -> Self:
-        return cls(
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        """Create a skill DTO from database row data.
+
+        Args:
+            data: Dictionary containing the skill and audit fields.
+
+        Returns:
+            A populated skill DTO.
+        """
+        return cls.model_construct(
             skill_id=data.get("skill_id", 0),
             org_id=data.get("org_id", 0),
             name=data.get("name", ""),
@@ -29,7 +37,12 @@ class SkillDTO(BaseDTO):
             updated_by=data.get("updated_by", "admin"),
         )
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
+        """Return the skill and audit fields as a dictionary.
+
+        Returns:
+            The skill fields keyed by their DTO names.
+        """
         return {
             "skill_id": self.skill_id,
             "org_id": self.org_id,
