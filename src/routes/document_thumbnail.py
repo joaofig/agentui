@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from urllib.parse import quote
 
 from fastapi import APIRouter, HTTPException
 from starlette.responses import Response
@@ -85,3 +86,52 @@ async def rag_document_thumbnail(
 
     media_type = "image/png" if normalized_format == "png" else "image/jpeg"
     return Response(content=image, media_type=media_type)
+
+
+@router.get("/api/organizations/{org_id}/rag-documents/{rag_doc_id}/download")
+async def rag_document_download(org_id: int, rag_doc_id: int) -> Response:
+    """Return a document as a downloadable attachment.
+
+    Args:
+        org_id: Organization ID that owns the document.
+        rag_doc_id: Database ID of the document to download.
+
+    Returns:
+        An attachment response containing the original document bytes.
+
+    Raises:
+        HTTPException: If the document is missing, belongs to another
+            organization, or has no content.
+    """
+    repository = RagDocumentRepository()
+    document = await repository.load(rag_doc_id)
+    if document is None or document.org_id != org_id:
+        raise HTTPException(404, "Document not found.")
+
+    content = await repository.load_content(rag_doc_id, org_id)
+    if content is None:
+        raise HTTPException(422, "Document has no content to download.")
+
+    file_name = document.file_name or "document"
+    fallback_file_name = (
+        "".join(
+            character
+            if character.isascii()
+            and 0x20 <= ord(character) <= 0x7E
+            and character not in {'"', "\\", "/"}
+            else "_"
+            for character in file_name
+        ).strip()
+        or "document"
+    )
+    encoded_file_name = quote(file_name, safe="!#$&+-.^_`|~")
+    content_disposition = (
+        f'attachment; filename="{fallback_file_name}"; '
+        f"filename*=UTF-8''{encoded_file_name}"
+    )
+
+    return Response(
+        content=content,
+        media_type=document.content_type or "application/octet-stream",
+        headers={"Content-Disposition": content_disposition},
+    )

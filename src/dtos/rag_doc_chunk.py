@@ -1,10 +1,8 @@
-from dataclasses import dataclass
 from typing import Self
 
 from dtos.base import ReadOnlyDTO
 
 
-@dataclass
 class RagDocumentChunkDTO(ReadOnlyDTO):
     """A single chunk of a document stored in document_chunk."""
 

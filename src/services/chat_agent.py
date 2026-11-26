@@ -13,7 +13,6 @@ from haystack.utils import Secret
 from nicemvvm.tools.messenger import Messenger
 
 from services.chat_tools import get_current_time
-from services.pg_skill_store import PgSkillStore
 from src.services.mojeek_search import create_mojeek_search_tool
 from src.services.rag_service import RagService
 from src.services.user import get_org_id
@@ -30,6 +29,9 @@ SYSTEM_PROMPT = (
     "Use markdown to format your response.\n"
     "When you use information from the websearch results, cite your sources "
     "using markdown links.\n"
+    "Also search the local knowledge base, and cite your sources using markdown links.\n"
+    "The markdown links should be formatted as "
+    "'/api/organizations/{org_id}/rag-documents/{rag_doc_id}/download'.\n"
     "It is important that you cite accurately.\n"
 )
 
@@ -67,7 +69,7 @@ def list_knowledge_base_documents(
     """List all documents currently indexed in the remote PostgreSQL database."""
     rag_service = RagService()
     org_id = get_org_id()
-    return rag_service.list_documents_formatted(org_id=org_id, limit=limit)
+    return asyncio.run(rag_service.list_documents_formatted(org_id=org_id, limit=limit))
 
 
 @tool
@@ -77,7 +79,7 @@ def get_document_details(
     """Retrieve all content chunks and page details for a specific document
     by its ID."""
     rag_service = RagService()
-    return rag_service.get_document_details_formatted(document_id=document_id)
+    return asyncio.run(rag_service.get_document_details_formatted(document_id=document_id))
 
 
 class ChatAgent:

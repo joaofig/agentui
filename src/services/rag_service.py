@@ -1,3 +1,5 @@
+import asyncio
+
 import pymupdf
 from beartype import beartype
 from loguru import logger
@@ -51,6 +53,7 @@ class RagService:
     @beartype
     async def search(self, org_id: int, query: str, limit: int = 5) -> list[SearchHit]:
         """Perform hybrid search with fallback to keyword search."""
+        logger.info(f"Searching for '{query}'")
         if not query or not query.strip():
             return []
 
@@ -77,13 +80,14 @@ class RagService:
                 f"Hybrid search failed: {exc}. Attempting keyword-only search."
             )
             return await self.repository.search_keyword(
+                org_id=org_id,
                 query=cleaned_query, limit=limit
             )
 
     @beartype
     def search_and_format(self, org_id: int, query: str, limit: int = 5) -> str:
         """Search the knowledge base and format findings as structured LLM context."""
-        hits = self.search(org_id, query, limit=limit)
+        hits = asyncio.run(self.search(org_id, query, limit=limit))
         if not hits:
             return (
                 "No relevant documents found in the knowledge base for "
@@ -107,9 +111,9 @@ class RagService:
         return "\n---\n".join(formatted_results)
 
     @beartype
-    def get_document_details_formatted(self, document_id: int) -> str:
+    async def get_document_details_formatted(self, document_id: int) -> str:
         """Retrieve and format all chunks of a document."""
-        chunks = self.repository.list(document_id)
+        chunks = await self.repository.list(document_id)
         if not chunks:
             return f"No chunks found for Document ID {document_id}."
 
@@ -121,10 +125,10 @@ class RagService:
         return "\n".join(lines)
 
     @beartype
-    def list_documents_formatted(self, org_id: int, limit: int = 50) -> str:
+    async def list_documents_formatted(self, org_id: int, limit: int = 50) -> str:
         """Format the list of indexed documents in the database."""
         repository = RagDocumentRepository()
-        docs = repository.list(org_id)
+        docs = await repository.list(org_id)
         if not docs:
             return (
                 "No documents are currently indexed in the PostgreSQL knowledge base."

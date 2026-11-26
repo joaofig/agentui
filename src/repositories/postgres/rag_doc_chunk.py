@@ -1,6 +1,6 @@
 import builtins
 from collections.abc import Sequence
-from typing import LiteralString
+from typing import LiteralString, List
 
 from nicemvvm.tools.user import get_user_name
 
@@ -92,36 +92,41 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
 
     async def search_keyword(
         self, org_id: int, query: str, limit: int = 5
-    ) -> list[SearchHit]:
+    ) -> List[SearchHit]:
         """Full-text and keyword search using PostgreSQL tsvector and ILIKE."""
         cleaned_query = query.strip()
         if not cleaned_query:
             return []
+        print(f"Query: {cleaned_query}")
 
         # We use plainto_tsquery combined with ILIKE for robust matching
         sql = """
-                SELECT  c.rag_chunk_id,
-                        c.rag_doc_id,
-                        COALESCE(d.file_name, '')   AS file_name,
-                        COALESCE(d.title, '')       AS title,
-                        c.page_number,
-                        c.ordinal,
-                        c.content,
-                        ts_rank_cd(c.tsv, plainto_tsquery('english', %s)) AS rank_score
-                FROM    rag_doc_chunk c
-                JOIN    rag_document d ON c.rag_doc_id = d.rag_doc_id
-                WHERE   c.org_id = %s
-                        AND (c.tsv @@ plainto_tsquery('english', %s) 
-                                OR c.content ILIKE %s
-                                OR d.title ILIKE %s)
-              ORDER BY  rank_score DESC, c.rag_chunk_id
-              LIMIT     %s;
+                SELECT      c.rag_chunk_id,
+                            c.rag_doc_id,
+                            COALESCE(d.file_name, '')   AS file_name,
+                            COALESCE(d.title, '')       AS title,
+                            c.page_number,
+                            c.ordinal,
+                            c.content,
+                            ts_rank_cd(c.tsv, plainto_tsquery('english', %s)) AS rank_score
+                FROM        rag_doc_chunk c
+                JOIN        rag_document d ON c.rag_doc_id = d.rag_doc_id
+                WHERE       c.org_id = %s
+                ORDER BY    rank_score DESC
+                LIMIT       %s;
               """
 
-        like_pattern = f"%{cleaned_query}%"
-        rows = self.execute_query(
+        # like_pattern = f"%{cleaned_query}%"
+        rows = await self.execute_query(
             sql,
-            (cleaned_query, org_id, cleaned_query, like_pattern, like_pattern, limit),
+            (
+                cleaned_query,
+                org_id,
+                # cleaned_query,
+                # like_pattern,
+                # like_pattern,
+                limit
+             ),
         )
 
         hits: list[SearchHit] = []
@@ -143,7 +148,7 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
 
     async def search_vector(
         self, org_id: int, query_embedding: Sequence[float], limit: int = 5
-    ) -> list[SearchHit]:
+    ) -> List[SearchHit]:
         """Vector similarity search using cosine distance with pgvector."""
         if not query_embedding:
             return []
@@ -191,7 +196,7 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
         query_embedding: Sequence[float] | None = None,
         limit: int = 5,
         rrf_k: int = 60,
-    ) -> list[SearchHit]:
+    ) -> List[SearchHit]:
         """Hybrid search combining keyword search and semantic vector search via RRF.
 
         Reciprocal Rank Fusion (RRF) formula:
