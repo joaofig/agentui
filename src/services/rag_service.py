@@ -5,7 +5,8 @@ import pymupdf
 from beartype import beartype
 from loguru import logger
 
-from repositories.postgres.rag_document import RagDocumentRepository
+from src.repositories.postgres.rag_document import RagDocumentRepository
+from src.services.text import count_words
 from src.dtos.rag_doc_chunk import RagDocumentChunkDTO
 from src.dtos.rag_document import RagDocumentDTO
 from src.dtos.search_hit import SearchHit
@@ -23,7 +24,7 @@ def merge_chunks(
     chunk = chunks[0]
     for next_chunk in chunks[1:]:
         if chunk.word_count < min_words:
-            chunk.merge(next_chunk)
+            chunk = chunk.merge(next_chunk)
         else:
             result.append(chunk)
             chunk = next_chunk
@@ -51,12 +52,15 @@ class RagService:
                 page_end=int(paragraph.get("page", 0)),
                 ordinal=ordinal,
                 content=str(paragraph.get("text", "")),
+                word_count=count_words(str(paragraph.get("text", ""))),
                 embedding=None,
             )
             for ordinal, paragraph in enumerate(paragraphs)
         ]
+        logger.info(f"Extracted {len(small_chunks)} small chunks from PDF")
 
         chunks = merge_chunks(small_chunks)
+        logger.info(f"Merged {len(small_chunks)} small chunks into {len(chunks)} large chunks")
 
         for chunk in chunks:
             embedding_list = await embed_texts_async([str(chunk.content)])

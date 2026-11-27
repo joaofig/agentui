@@ -1,13 +1,12 @@
 import re
-from collections import Counter
 
 from beartype import beartype
 
 
 @beartype
-def count_words(text: str) -> tuple[int, Counter]:
+def count_words(text: str) -> int:
     words = re.findall(r"\b\w+\b", text.lower())
-    return len(words), Counter(words)
+    return len(words)
 
 
 @beartype
