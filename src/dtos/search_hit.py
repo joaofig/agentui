@@ -10,9 +10,11 @@ class SearchHit:
     document_id: int
     file_name: str
     title: str
-    page: int
+    page_ini: int
+    page_end: int
     ordinal: int
     content: str
+    word_count: int
     score: float = 0.0
     search_type: str = "hybrid"  # "vector", "keyword", or "hybrid"
     metadata: dict[str, Any] = field(default_factory=dict)

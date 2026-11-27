@@ -1,9 +1,13 @@
 import re
 from pathlib import Path
+from collections import Counter
 
 import pymupdf as fitz  # PyMuPDF
+from beartype import beartype
 from haystack import Document, component
 from pymupdf import pymupdf
+
+from services.text import clean_block
 
 
 @component
@@ -42,27 +46,7 @@ class PyMuPDFParagraphConverter:
         return {"documents": documents}
 
 
-# pipeline = Pipeline()
-# pipeline.add_component("converter", PyMuPDFParagraphConverter())
-# pipeline.add_component(
-#     "splitter", DocumentSplitter(split_by="passage", split_length=1)
-# )
-# pipeline.connect("converter", "splitter")
-#
-# result = pipeline.run({"converter": {"sources": ["document.pdf"]}})
-# paragraphs = [
-#     d.content.strip()
-#     for d in result["splitter"]["documents"]
-#     if d.content.strip()
-# ]
-
-
-def clean_block(text: str) -> str:
-    text = re.sub(r"-\n(\w)", r"\1", text)
-    text = re.sub(r"\s*\n\s*", " ", text)
-    return re.sub(r"\s{2,}", " ", text).strip()
-
-
+@beartype
 def extract_paragraphs(
     doc: pymupdf.Document, min_chars: int = 20
 ) -> list[dict[str, int | str]]:
@@ -73,5 +57,8 @@ def extract_paragraphs(
                 continue
             para = clean_block(text)
             if len(para) >= min_chars:
-                paragraphs.append({"page": page.number + 1, "text": para})
+                paragraphs.append({
+                    "page": page.number + 1,
+                    "text": para,
+                })
     return paragraphs

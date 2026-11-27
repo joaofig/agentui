@@ -84,7 +84,7 @@ async def embed_texts_async(
     model: str = DEFAULT_EMBED_MODEL,
     dimensions: int = DEFAULT_EMBED_DIM,
     max_sequence_length: int = 2048,
-) -> list[list[float]]:
+) -> list[list[float | int]]:
     """Compute embeddings for a sequence of texts.
 
     Args:

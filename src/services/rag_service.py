@@ -1,4 +1,5 @@
 import asyncio
+from typing import List
 
 import pymupdf
 from beartype import beartype
@@ -13,6 +14,23 @@ from src.services.embeddings import embed_query, embed_texts_async
 from src.services.pdf import extract_paragraphs
 
 
+@beartype
+def merge_chunks(
+        chunks: List[RagDocumentChunkDTO],
+        min_words: int = 100) -> List[RagDocumentChunkDTO]:
+    result: List[RagDocumentChunkDTO] = []
+
+    chunk = chunks[0]
+    for next_chunk in chunks[1:]:
+        if chunk.word_count < min_words:
+            chunk.merge(next_chunk)
+        else:
+            result.append(chunk)
+            chunk = next_chunk
+    result.append(chunk)
+    return result
+
+
 class RagService:
     """High-level service providing RAG operations against PostgreSQL knowledge base."""
 
@@ -23,24 +41,27 @@ class RagService:
         doc: pymupdf.PdfDocument = pymupdf.open(stream=document.content, filetype="pdf")
         paragraphs = extract_paragraphs(doc)
 
-        embeddings = await embed_texts_async(
-            [str(paragraph["text"]) for paragraph in paragraphs]
-        )
-
-        chunks = [
+        # These are small chunks of text extracted from the PDF document, corresponding to individual paragraphs.
+        small_chunks = [
             RagDocumentChunkDTO(
                 rag_chunk_id=0,
                 rag_doc_id=document.rag_doc_id,
                 org_id=document.org_id,
-                page_number=int(paragraph.get("page", 0)),
+                page_ini=int(paragraph.get("page", 0)),
+                page_end=int(paragraph.get("page", 0)),
                 ordinal=ordinal,
                 content=str(paragraph.get("text", "")),
-                embedding=embedding,
+                embedding=None,
             )
-            for ordinal, (paragraph, embedding) in enumerate(
-                zip(paragraphs, embeddings, strict=True)
-            )
+            for ordinal, paragraph in enumerate(paragraphs)
         ]
+
+        chunks = merge_chunks(small_chunks)
+
+        for chunk in chunks:
+            embedding_list = await embed_texts_async([str(chunk.content)])
+            chunk.embedding = embedding_list[0]
+
         ids = await self.repository.insert(chunks)
         logger.info(f"Inserted {len(ids)} chunks")
 

@@ -21,10 +21,10 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
 
         sql: LiteralString = """
         INSERT INTO rag_doc_chunk (
-            rag_doc_id, org_id, page_number, ordinal, content, embedding, created_by
+            rag_doc_id, org_id, page_ini, page_end, ordinal, content, word_count, embedding, created_by
         )
         VALUES (
-            %s, %s, %s, %s, %s, %s, %s
+            %s, %s, %s, %s, %s, %s, %s, %s, %s
         )
         RETURNING rag_chunk_id;
         """
@@ -38,9 +38,11 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
                         (
                             chunk.rag_doc_id,
                             chunk.org_id,
-                            chunk.page_number,
+                            chunk.page_ini,
+                            chunk.page_end,
                             chunk.ordinal,
                             chunk.content,
+                            chunk.word_count,
                             chunk.embedding,
                             get_user_name(),
                         ),
@@ -63,7 +65,7 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
                     sql,
                     (
                         len(rag_doc_chunks),
-                        max(c.page_number for c in rag_doc_chunks),
+                        max(c.page_end for c in rag_doc_chunks),
                         rag_doc_chunks[0].rag_doc_id,
                     ),
                 )
@@ -77,7 +79,8 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
         SELECT  rag_chunk_id
         ,       rag_doc_id
         ,       org_id
-        ,       page_number
+        ,       page_ini
+        ,       page_end
         ,       ordinal
         ,       content
         ,       created_on
@@ -105,9 +108,11 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
                             c.rag_doc_id,
                             COALESCE(d.file_name, '')   AS file_name,
                             COALESCE(d.title, '')       AS title,
-                            c.page_number,
+                            c.page_ini,
+                            c.page_end,
                             c.ordinal,
                             c.content,
+                            c.word_count,
                             ts_rank_cd(c.tsv, plainto_tsquery('english', %s)) AS rank_score
                 FROM        rag_doc_chunk c
                 JOIN        rag_document d ON c.rag_doc_id = d.rag_doc_id
@@ -137,10 +142,12 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
                     document_id=row[1],
                     file_name=row[2],
                     title=row[3],
-                    page=row[4],
-                    ordinal=row[5],
-                    content=row[6],
-                    score=float(row[7]) if row[7] is not None else 0.0,
+                    page_ini=row[4],
+                    page_end=row[5],
+                    ordinal=row[6],
+                    content=row[7],
+                    word_count=row[8],
+                    score=float(row[9]) if row[9] is not None else 0.0,
                     search_type="keyword",
                 )
             )
@@ -160,9 +167,11 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
                             c.rag_doc_id,
                             COALESCE(d.file_name, '')   AS file_name,
                             COALESCE(d.title, '')       AS title,
-                            c.page_number,
+                            c.page_ini,
+                            c.page_end,
                             c.ordinal,
                             c.content,
+                            c.word_count,
                             (1 - (c.embedding <=> %s::vector)) AS similarity
                 FROM        rag_doc_chunk c
                 JOIN        rag_document d ON c.rag_doc_id = d.rag_doc_id
@@ -180,10 +189,12 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
                     document_id=row[1],
                     file_name=row[2],
                     title=row[3],
-                    page=row[4],
-                    ordinal=row[5],
-                    content=row[6],
-                    score=float(row[7]) if row[7] is not None else 0.0,
+                    page_ini=row[4],
+                    page_end=row[5],
+                    ordinal=row[6],
+                    content=row[7],
+                    word_count=row[8],
+                    score=float(row[9]) if row[9] is not None else 0.0,
                     search_type="vector",
                 )
             )
@@ -235,7 +246,7 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
 
         # Sort by final fused RRF score
         sorted_chunk_ids = sorted(
-            rrf_scores.keys(), key=lambda cid: rrf_scores[cid], reverse=True
+            rrf_scores.keys(), key=lambda _cid: rrf_scores[_cid], reverse=True
         )
 
         results: list[SearchHit] = []
@@ -247,9 +258,11 @@ class RagDocumentChunkRepository(PostgresRepositoryAsync):
                     document_id=item.document_id,
                     file_name=item.file_name,
                     title=item.title,
-                    page=item.page,
+                    page_ini=item.page_ini,
+                    page_end=item.page_end,
                     ordinal=item.ordinal,
                     content=item.content,
+                    word_count=item.word_count,
                     score=rrf_scores[cid],
                     search_type="hybrid",
                     metadata={

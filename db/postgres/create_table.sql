@@ -129,9 +129,11 @@ CREATE TABLE IF NOT EXISTS rag_doc_chunk
     rag_chunk_id    bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     rag_doc_id      bigint NOT NULL REFERENCES rag_document(rag_doc_id) ON DELETE CASCADE,
     org_id          bigint NOT NULL REFERENCES organization_account(org_id),
-    page_number     integer NOT NULL,
+    page_ini        integer NOT NULL,
+    page_end        integer NOT NULL,
     ordinal         integer NOT NULL,
     content         text NOT NULL DEFAULT '',
+    word_count      integer NOT NULL DEFAULT 0,
     embedding       vector(1536) NOT NULL,
     tsv             tsvector GENERATED ALWAYS AS (to_tsvector('simple', content)) STORED,
 
