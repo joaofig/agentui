@@ -62,9 +62,11 @@ class RagService:
         chunks = merge_chunks(small_chunks)
         logger.info(f"Merged {len(small_chunks)} small chunks into {len(chunks)} large chunks")
 
-        for chunk in chunks:
-            embedding_list = await embed_texts_async([str(chunk.content)])
-            chunk.embedding = embedding_list[0]
+        content_list = [str(chunk.content) for chunk in chunks]
+        embedding_list = await embed_texts_async(content_list)
+
+        for chunk, embedding in zip(chunks, embedding_list):
+            chunk.embedding = embedding
 
         ids = await self.repository.insert(chunks)
         logger.info(f"Inserted {len(ids)} chunks")
